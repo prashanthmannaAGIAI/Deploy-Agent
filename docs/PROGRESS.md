@@ -1,6 +1,6 @@
 # Progress
 
-## Current phase: 0 — Foundations (built; compose verification pending)
+## Current phase: 0 — Foundations (done; local Docker pending)
 
 ### Plan
 
@@ -18,11 +18,12 @@
 - Steps 1–7.
 - `pnpm check` passes locally (Prettier, ESLint, ruff, tsc, mypy strict, Vitest, pytest).
 - `docker compose config` validates; compose refuses to start without `.env` passwords.
+- CI green on GitHub: checks job, and the `compose-smoke` job (all services healthy, smoke probes pass).
 - Decisions: ADR 0002 (TS 6.0 / ESLint 9 / pinned Vitest, pnpm 12 supply-chain settings), ADR 0003 (local stack, Temporal auto-setup 1.29.7).
 
 ### Not yet verified
 
-- `pnpm compose:up` + `deploy/smoke-test.sh` on the dev machine: Docker Desktop's engine can't start because WSL 2 isn't installed. Also verifiable with the CI `compose-smoke` job (manual trigger).
+- `pnpm compose:up` on the dev machine: Docker Desktop's engine can't start because WSL 2 isn't installed. Verified on GitHub runners instead.
 
 ### Next
 
