@@ -1,0 +1,104 @@
+# Local development dependencies for Runway.
+# Usage (from the repo root): cp .env.example .env && pnpm compose:up
+# All ports bind to 127.0.0.1 only. Passwords come from .env and have no defaults here on purpose.
+name: runway
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg16-trixie
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: postgres
+      RUNWAY_DB_NAME: ${POSTGRES_DB:-runway}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:8.8.3-alpine
+    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  temporal:
+    # auto-setup creates and migrates the temporal + temporal_visibility databases on start.
+    # 1.29.x is the last auto-setup release; see docs/adr/0003-local-dev-stack.md.
+    image: temporalio/auto-setup:1.29.7
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_SEEDS: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PWD: ${POSTGRES_PASSWORD:?set in .env}
+      DEFAULT_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+    ports:
+      - "127.0.0.1:${TEMPORAL_PORT:-7233}:7233"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "temporal operator cluster health --address temporal:7233 | grep -q SERVING"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+
+  temporal-ui:
+    image: temporalio/ui:2.54.1
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "127.0.0.1:${TEMPORAL_UI_PORT:-8233}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.4
+    command: ["start-dev", "--import-realm", "--health-enabled=true", "--http-port=8080"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:?set in .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set in .env}
+      # Substituted into realm-runway.json at import time.
+      KEYCLOAK_WEB_CLIENT_SECRET: ${KEYCLOAK_WEB_CLIENT_SECRET:?set in .env}
+      WEB_BASE_URL: ${WEB_BASE_URL:-http://localhost:3000}
+    ports:
+      - "127.0.0.1:${KEYCLOAK_PORT:-8081}:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+      - ./keycloak:/opt/keycloak/data/import:ro
+    healthcheck:
+      # The image has no curl/wget; talk HTTP to the management port with bash.
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  postgres-data:
+  keycloak-data:

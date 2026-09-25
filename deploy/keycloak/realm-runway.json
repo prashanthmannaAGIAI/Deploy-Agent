@@ -1,0 +1,47 @@
+{
+  "realm": "runway",
+  "enabled": true,
+  "displayName": "Runway",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "sslRequired": "external",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "roles": {
+    "realm": [
+      { "name": "viewer", "description": "Read projects, deployments, logs and metrics." },
+      { "name": "deployer", "description": "Start deployments and approve production plans." },
+      { "name": "admin", "description": "Manage members, connections and settings." }
+    ]
+  },
+  "defaultRoles": ["viewer"],
+  "clients": [
+    {
+      "clientId": "runway-web",
+      "name": "Runway web app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KEYCLOAK_WEB_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "${WEB_BASE_URL}",
+      "baseUrl": "/",
+      "redirectUris": ["${WEB_BASE_URL}/api/auth/callback/keycloak"],
+      "webOrigins": ["${WEB_BASE_URL}"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${WEB_BASE_URL}/*"
+      }
+    }
+  ]
+}
