@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Runway prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F5;--surface:#FFFFFF;--surface-2:#F5F7FA;--ink:#15202B;--muted:#586475;--line:#D5DCE4;--line-2:#C3CCD7;
+  --accent:#2B57E0;--accent-ink:#FFFFFF;--accent-soft:#E3EAFC;
+  --ok:#16825A;--ok-soft:#E0F2E9;--warn:#9A620C;--warn-soft:#FBEFD8;--err:#BF3434;--err-soft:#FBE5E5;
+  --term:#101820;--term-ink:#D3DCE6;--term-muted:#7F8C9C;--fresh:#FFF3C4;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F141A;--surface:#171E26;--surface-2:#1C252F;--ink:#E4E9EF;--muted:#98A3B2;--line:#29333F;--line-2:#374352;
+  --accent:#7C9BFF;--accent-ink:#0C1430;--accent-soft:#1D2947;
+  --ok:#4BC28A;--ok-soft:#12302A;--warn:#E2A94A;--warn-soft:#342712;--err:#F07474;--err-soft:#3A1919;
+  --term:#0A0F14;--term-ink:#D3DCE6;--term-muted:#76839A;--fresh:#3A3417;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F141A;--surface:#171E26;--surface-2:#1C252F;--ink:#E4E9EF;--muted:#98A3B2;--line:#29333F;--line-2:#374352;
+  --accent:#7C9BFF;--accent-ink:#0C1430;--accent-soft:#1D2947;
+  --ok:#4BC28A;--ok-soft:#12302A;--warn:#E2A94A;--warn-soft:#342712;--err:#F07474;--err-soft:#3A1919;
+  --term:#0A0F14;--term-ink:#D3DCE6;--term-muted:#76839A;--fresh:#3A3417;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25;font-weight:600}
+h1{font-size:26px;letter-spacing:-.01em}
+h2{font-size:21px;letter-spacing:-.005em}
+h3{font-size:16px}
+p{margin:0}
+.mono{font-family:var(--mono);font-size:13.5px}
+.muted{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.small{min-height:32px;padding:0 12px;font-size:14px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:16px;padding:0 20px;height:56px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px}
+.brand svg{flex:none}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--warn-soft);color:var(--warn);font-weight:500}
+.nav{display:flex;gap:4px;margin-left:12px;overflow-x:auto}
+.nav button{border:0;background:transparent;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;white-space:nowrap}
+.nav button[aria-current="page"]{color:var(--ink);background:var(--surface-2)}
+.top .spacer{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600;font-size:13px;flex:none}
+
+/* login */
+.login{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.login-art{background:var(--term);color:var(--term-ink);padding:48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px}
+.login-art h1{font-size:34px;max-width:15ch;color:#fff;font-weight:600;letter-spacing:-.02em}
+.login-art p{color:var(--term-muted);max-width:44ch;margin-top:14px}
+.login-art pre{margin:0;font:13px/1.7 var(--mono);color:var(--term-ink);white-space:pre-wrap}
+.login-art pre .k{color:#8FA7FF}.login-art pre .c{color:var(--term-muted)}
+.login-form{display:flex;align-items:center;justify-content:center;padding:40px 24px}
+.login-form form{width:100%;max-width:380px;display:grid;gap:16px}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.sso{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* fields */
+.fld{display:grid;gap:6px}
+.fld>span{font-size:14px;font-weight:500}
+.fld small,.tog small{color:var(--muted);font-size:13px;display:block}
+input[type=text],input[type=email],input[type=password],input[type=number],select,textarea{width:100%;min-height:40px;padding:8px 12px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface)}
+textarea{min-height:96px;resize:vertical;font-family:var(--mono);font-size:13px}
+input:hover,select:hover,textarea:hover{border-color:var(--muted)}
+input[readonly]{background:var(--surface-2)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;width:fit-content;max-width:100%}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:7px;cursor:pointer;font-weight:500;color:var(--muted)}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.tog{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;cursor:pointer;padding:12px 0;border-top:1px solid var(--line)}
+.tog input{position:absolute;opacity:0;width:1px;height:1px}
+.sw{width:36px;height:20px;border-radius:10px;background:var(--line-2);position:relative;margin-top:2px;transition:background .15s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.tog input:checked+.sw{background:var(--accent)}
+.tog input:checked+.sw::after{transform:translateX(16px)}
+.tog input:focus-visible+.sw{outline:2px solid var(--accent);outline-offset:2px}
+.tog b{font-weight:500}
+.err{color:var(--err);font-size:14px;font-weight:500}
+
+/* wizard layout */
+.wiz{display:grid;grid-template-columns:230px minmax(0,1fr) 400px;min-height:calc(100vh - 56px)}
+.rail{border-right:1px solid var(--line);padding:24px 12px;background:var(--surface)}
+.rail ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:s}
+.rail li button{width:100%;display:flex;align-items:center;gap:12px;padding:9px 10px;border:0;background:transparent;border-radius:8px;cursor:pointer;text-align:left;color:var(--muted);font-weight:500}
+.rail li button[disabled]{cursor:default;opacity:.55}
+.rail li button:not([disabled]):hover{background:var(--surface-2)}
+.rail .n{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:12px;flex:none}
+.rail .done .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.rail .cur button{color:var(--ink);background:var(--accent-soft)}
+.rail .cur .n{border-color:var(--accent);color:var(--accent)}
+.main{padding:32px clamp(20px,4vw,48px) 48px;max-width:820px;width:100%}
+.head{display:grid;gap:8px;margin-bottom:24px}
+.head p{color:var(--muted);max-width:62ch}
+.stack{display:grid;gap:20px}
+.foot{display:flex;align-items:center;gap:12px;margin-top:32px;padding-top:20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.foot .err{flex:1;min-width:200px}
+
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.opt{display:grid;gap:6px;text-align:left;padding:16px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;position:relative}
+.opt:hover{border-color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);background:var(--accent-soft)}
+.opt .mk{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font-weight:600;font-size:13px;background:var(--surface-2);border:1px solid var(--line)}
+.opt b{font-weight:600}
+.opt small{color:var(--muted);font-size:13px;line-height:1.45}
+.opt .rec{position:absolute;top:12px;right:12px;font-size:11.5px;font-weight:500;color:var(--ok);background:var(--ok-soft);padding:2px 8px;border-radius:99px}
+
+.note{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:14px 16px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-size:14px}
+.note.ok{background:var(--ok-soft);border-color:transparent}
+.note.warn{background:var(--warn-soft);border-color:transparent}
+.note.err{background:var(--err-soft);border-color:transparent;color:var(--ink);font-weight:400}
+.note .ic{width:20px;height:20px;flex:none;margin-top:1px}
+.agent{background:var(--accent-soft);border-color:transparent}
+.agent .who{font-weight:600;color:var(--accent);font-size:13px;margin-bottom:2px}
+.code{margin:0;padding:14px 16px;border-radius:10px;background:var(--term);color:var(--term-ink);font:12.5px/1.65 var(--mono);overflow-x:auto;white-space:pre}
+
+.env-row{display:grid;grid-template-columns:1fr 1.4fr auto auto;gap:8px;align-items:center}
+.env-row label.chk{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);white-space:nowrap}
+
+/* review */
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sum section{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface)}
+.sum dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.sum dt{color:var(--muted)}
+.sum dd{margin:0;text-align:right;font-weight:500;overflow-wrap:anywhere}
+.list{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.list li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.cost{display:flex;align-items:baseline;gap:8px}
+.cost b{font-size:28px;font-weight:600;letter-spacing:-.01em}
+
+/* spec */
+.spec{border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;position:sticky;top:calc(56px + env(safe-area-inset-top,0px));height:calc(100vh - 56px - env(safe-area-inset-top,0px))}
+.spec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.spec-h h3{font-size:14px}
+.spec-h small{color:var(--muted);font-size:12.5px;display:block;font-weight:400}
+.spec pre{margin:0;flex:1;overflow:auto;padding:16px 0;font:12.5px/1.75 var(--mono)}
+.spec pre span.l{display:block;padding:0 20px;white-space:pre}
+.spec .k{color:var(--muted)}
+.spec .v{color:var(--ink)}
+.spec .u{color:var(--muted);font-style:italic;opacity:.7}
+.spec .c{color:var(--muted);font-style:italic}
+@media (prefers-reduced-motion:no-preference){.spec .fresh{animation:fr 1.6s ease-out}}
+@keyframes fr{from{background:var(--fresh)}to{background:transparent}}
+.spec-toggle{display:none}
+
+/* deploy */
+.page{padding:28px clamp(16px,3vw,40px) 48px;max-width:1280px;margin:0 auto}
+.dhead{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px}
+.dhead p{color:var(--muted);margin-top:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:13px;font-weight:500;background:var(--surface-2);border:1px solid var(--line)}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.run{color:var(--accent);background:var(--accent-soft);border-color:transparent}
+.pill.ok{color:var(--ok);background:var(--ok-soft);border-color:transparent}
+.pill.bad{color:var(--err);background:var(--err-soft);border-color:transparent}
+@media (prefers-reduced-motion:no-preference){.pill.run .dot{animation:pl 1s ease-in-out infinite}}
+@keyframes pl{50%{opacity:.3}}
+.dgrid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.stages{list-style:none;margin:0;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.stages li{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:center;padding:10px 10px;border-radius:8px;font-size:14px}
+.stages li.running{background:var(--accent-soft)}
+.stages li.failed{background:var(--err-soft)}
+.stages .st{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line-2)}
+.stages .done .st{background:var(--ok);border-color:var(--ok)}
+.stages .running .st{border-color:var(--accent);border-top-color:transparent}
+@media (prefers-reduced-motion:no-preference){.stages .running .st{animation:sp .8s linear infinite}}
+@keyframes sp{to{transform:rotate(360deg)}}
+.stages .failed .st{background:var(--err);border-color:var(--err)}
+.stages .dur{color:var(--muted);font:12px var(--mono)}
+.term{background:var(--term);border-radius:12px;overflow:hidden}
+.term-h{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;color:var(--term-muted);font-size:13px;border-bottom:1px solid #ffffff14}
+.term-b{height:420px;overflow:auto;padding:12px 16px;font:12.5px/1.7 var(--mono);color:var(--term-ink)}
+.term-b div{white-space:pre-wrap;overflow-wrap:anywhere}
+.term-b .cmd{color:#8FA7FF}.term-b .warn{color:#E8B559}.term-b .errl{color:#F28B8B}.term-b .okl{color:#6FD3A0}.term-b .dim{color:var(--term-muted)}
+.result{margin-bottom:20px;padding:20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;gap:14px}
+.result.bad{border-color:var(--err)}
+.result.good{border-color:var(--ok)}
+.result .acts{display:flex;gap:8px;flex-wrap:wrap}
+.diag{display:grid;gap:8px;padding:14px 16px;border-radius:10px;background:var(--accent-soft);font-size:14.5px}
+.diag code{font:12.5px var(--mono);background:var(--surface);padding:1px 6px;border-radius:4px}
+
+/* monitoring */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat small{color:var(--muted);font-size:13px}
+.stat div{font-size:22px;font-weight:600;margin-top:2px}
+.stat em{font-style:normal;font-size:12.5px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:16px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.chart h3{font-size:14px;display:flex;justify-content:space-between;font-weight:500}
+.chart h3 span{color:var(--muted);font-weight:400}
+.chart svg{width:100%;height:120px;display:block;margin-top:8px}
+.two{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel-h{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-weight:500;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.mono{font-size:12.5px;white-space:nowrap}
+.lv{font:500 11.5px var(--mono);padding:1px 6px;border-radius:4px}
+.lv.INFO{background:var(--surface-2);color:var(--muted)}.lv.WARN{background:var(--warn-soft);color:var(--warn)}.lv.ERROR{background:var(--err-soft);color:var(--err)}
+.events{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.events li{display:grid;grid-template-columns:10px 1fr;gap:12px;font-size:14px}
+.events .d{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--line-2)}
+.events .ok .d{background:var(--ok)}.events .bad .d{background:var(--err)}.events .inf .d{background:var(--accent)}
+.events small{color:var(--muted);display:block;font-size:12.5px}
+.empty{text-align:center;padding:64px 20px;display:grid;gap:12px;justify-items:center}
+
+/* agent drawer */
+.scrim{position:fixed;inset:0;background:#0008;z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--surface);z-index:21;display:flex;flex-direction:column;border-left:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.msgs{flex:1;overflow:auto;padding:16px;display:grid;gap:12px;align-content:start}
+.msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:14.5px;background:var(--surface-2);border:1px solid var(--line)}
+.msg.me{justify-self:end;background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px}
+.chips button{border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer}
+.ask{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+
+@media (max-width:1180px){
+  .wiz{grid-template-columns:210px minmax(0,1fr)}
+  .spec{display:none;position:fixed;inset:auto 0 0 0;top:auto;height:70vh;z-index:15;border-left:0;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .spec.open{display:flex}
+  .spec-toggle{display:inline-flex}
+}
+@media (max-width:820px){
+  .login{grid-template-columns:1fr}
+  .login-art{padding:32px 24px}
+  .login-art pre{display:none}
+  .wiz{grid-template-columns:1fr}
+  .rail{border-right:0;border-bottom:1px solid var(--line);padding:10px;overflow-x:auto}
+  .rail ol{display:flex;gap:4px}
+  .rail li button{white-space:nowrap;padding:8px 10px}
+  .dgrid,.two{grid-template-columns:1fr}
+  .env-row{grid-template-columns:1fr 1fr}
+  .top{padding:0 12px;gap:8px}
+  .top .tag{display:none}
+  .nav{margin-left:0}
+}
+@media (max-width:520px){.nav button{padding:8px}.brand span.bn{display:none}.top .btn .lbl{display:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const CLOUDS={
+  aws:{name:'AWS',mk:'AW',regions:['ap-south-1','ap-southeast-2','us-east-1','eu-west-1','me-central-1'],
+    svc:{container:'ECS Fargate',k8s:'EKS',serverless:'Lambda',vm:'EC2',static:'S3 + CloudFront'},
+    methods:[['role','Cross-account role'],['keys','Access keys']],
+    res:{registry:'ECR repository',lb:'Application Load Balancer',logs:'CloudWatch log group',net:'VPC with 2 private subnets',iam:'IAM task role',mon:'CloudWatch'}},
+  gcp:{name:'Google Cloud',mk:'GC',regions:['asia-south1','australia-southeast1','us-central1','europe-west1','me-central1'],
+    svc:{container:'Cloud Run',k8s:'GKE',serverless:'Cloud Functions',vm:'Compute Engine',static:'Cloud Storage + Cloud CDN'},
+    methods:[['wif','Workload identity'],['sa','Service account key']],
+    res:{registry:'Artifact Registry repository',lb:'HTTPS load balancer',logs:'Cloud Logging bucket',net:'VPC network',iam:'Service account',mon:'Cloud Monitoring'}},
+  azure:{name:'Azure',mk:'AZ',regions:['centralindia','australiaeast','eastus','westeurope','uaenorth'],
+    svc:{container:'Container Apps',k8s:'AKS',serverless:'Azure Functions',vm:'Virtual Machines',static:'Static Web Apps'},
+    methods:[['fed','Federated credential'],['secret','Client secret']],
+    res:{registry:'Container Registry',lb:'Application Gateway',logs:'Log Analytics workspace',net:'Virtual network',iam:'Managed identity',mon:'Azure Monitor'}},
+  do:{name:'DigitalOcean',mk:'DO',regions:['blr1','syd1','nyc3','ams3','fra1'],
+    svc:{container:'App Platform',k8s:'DOKS',serverless:'Functions',vm:'Droplets',static:'App Platform static site'},
+    methods:[['token','API token']],
+    res:{registry:'Container Registry',lb:'Load Balancer',logs:'Log forwarding',net:'VPC',iam:'Scoped API token',mon:'DigitalOcean Insights'}},
+  oci:{name:'Oracle Cloud',mk:'OC',regions:['ap-mumbai-1','ap-sydney-1','us-ashburn-1','eu-frankfurt-1','me-dubai-1'],
+    svc:{container:'Container Instances',k8s:'OKE',serverless:'OCI Functions',vm:'Compute',static:'Object Storage + CDN'},
+    methods:[['token','API signing key']],
+    res:{registry:'Container Registry',lb:'Load Balancer',logs:'Logging log group',net:'VCN',iam:'Dynamic group',mon:'OCI Monitoring'}}
+};
+const TYPES=[
+  ['container','Containerised web service','A long-running API or web app behind a load balancer.'],
+  ['k8s','Kubernetes','Deploy to a managed cluster with Helm charts.'],
+  ['serverless','Serverless functions','Event-driven jobs or low-traffic endpoints.'],
+  ['vm','Virtual machines','Full control over the host and OS.'],
+  ['static','Static site','A frontend build served from a CDN.']
+];
+const STACKS={
+  'Node.js':{v:'20',build:'npm ci && npm run build',start:'npm start',port:'3000'},
+  'Python':{v:'3.12',build:'pip install -r requirements.txt',start:'gunicorn app:app',port:'8000'},
+  'Java (Spring Boot)':{v:'21',build:'./mvnw package -DskipTests',start:'java -jar target/app.jar',port:'8080'},
+  'Go':{v:'1.22',build:'go build -o app .',start:'./app',port:'8080'},
+  '.NET':{v:'8.0',build:'dotnet publish -c Release -o out',start:'dotnet out/App.dll',port:'8080'},
+  'PHP (Laravel)':{v:'8.3',build:'composer install --no-dev',start:'php artisan serve --host=0.0.0.0',port:'8000'},
+  'React / Vue / Angular':{v:'20',build:'npm ci && npm run build',start:'',port:''}
+};
+const SIZES={small:['Small','0.5 vCPU, 1 GB',18],medium:['Medium','1 vCPU, 2 GB',42],large:['Large','2 vCPU, 4 GB',96]};
+const STEPS=['Cloud','Access','Repository','Target','Build','Infrastructure','Pipeline','Review'];
+const REPOS=['acme/payments-api','acme/web-dashboard','acme/notification-worker'];
+
+const S={
+  view:'login',user:'',step:0,far:0,err:'',specOpen:false,agentOpen:false,
+  cloud:null,
+  access:{method:'',accountId:'',roleArn:'',externalId:'rw-'+Math.random().toString(36).slice(2,10),keyId:'',secret:'',project:'',provider:'',saEmail:'',saJson:'',tenant:'',client:'',sub:'',clientSecret:'',token:'',region:'',connected:false,testing:false},
+  repo:{provider:'github',auth:'app',token:'',connected:false,name:'',branch:'main',scanned:false},
+  target:{type:null,env:'staging'},
+  build:{stack:'Node.js',version:'20',docker:'generate',buildCmd:'npm ci && npm run build',start:'npm start',port:'3000',outDir:'dist'},
+  infra:{iac:'terraform',state:'customer',cluster:'new',clusterName:'',helm:true,ns:'default',size:'small',min:'1',max:'4',db:'none',domain:'',tls:true},
+  pipe:{ci:'native',trigger:'push',tests:true,testCmd:'npm test',scan:true,approval:true,rollback:true,notify:'Slack',env:[{k:'NODE_ENV',v:'production',s:false},{k:'DATABASE_URL',v:'',s:true}]},
+  reviewed:false,history:[],range:'1h',lvl:'ALL',q:'',
+  chat:[{me:false,m:'I can explain any step, suggest settings for your repo, or dig into a failed deployment. What do you need?'}]
+};
+const D={stages:[],log:[],status:'idle',fixed:false,started:0};
+let prevSpec=[],timer=null;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const get=p=>p.split('.').reduce((o,k)=>o==null?o:o[k],S);
+function set(p,v){const ks=p.split('.');let o=S;for(const k of ks.slice(0,-1))o=o[k];o[ks[ks.length-1]]=v}
+const CL=()=>CLOUDS[S.cloud]||CLOUDS.aws;
+const svcName=()=>S.target.type?CL().svc[S.target.type]:'';
+const project=()=>(S.repo.name||'my-app').split('/').pop();
+const ciName=()=>S.pipe.ci==='runway'?'Runway runners':({github:'GitHub Actions',bitbucket:'Bitbucket Pipelines',gitlab:'GitLab CI'})[S.repo.provider];
+const iacName=()=>S.infra.iac==='terraform'?'Terraform':S.infra.iac==='tofu'?'OpenTofu':'';
+const isStatic=()=>S.target.type==='static';
+
+const I={
+  check:'<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>',
+  warn:'<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg>',
+  info:'<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6v.5"/></svg>',
+  spark:'<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 2v4M10 14v4M2 10h4M14 10h4M4.5 4.5l2.5 2.5M13 13l2.5 2.5M4.5 15.5L7 13M13 7l2.5-2.5"/></svg>',
+  lock:'<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="9" width="12" height="9" rx="2"/><path d="M7 9V6a3 3 0 016 0v3"/></svg>'
+};
+const logo='<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="var(--accent)"/><path d="M7 18h12M9 14.5h8M11 11h4" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round"/></svg>';
+
+/* field helpers */
+const fld=(label,path,o={})=>`<label class="fld"><span>${label}</span><input type="${o.type||'text'}" data-bind="${path}" value="${esc(get(path))}" placeholder="${esc(o.ph||'')}" ${o.mono?'class="mono"':''} ${o.ro?'readonly':''} autocomplete="off" spellcheck="false">${o.hint?`<small>${o.hint}</small>`:''}</label>`;
+const sel=(label,path,opts,re=true)=>`<label class="fld"><span>${label}</span><select data-bind="${path}" ${re?'data-re':''}>${opts.map(x=>{const [v,t]=Array.isArray(x)?x:[x,x];return `<option value="${esc(v)}" ${String(get(path))===String(v)?'selected':''}>${esc(t)}</option>`}).join('')}</select></label>`;
+const seg=(label,path,opts)=>`<div class="fld"><span id="lb-${path}">${label}</span><div class="seg" role="radiogroup" aria-labelledby="lb-${path}">${opts.map(([v,t])=>`<button type="button" role="radio" aria-checked="${get(path)===v}" data-set="${path}" data-val="${esc(v)}">${esc(t)}</button>`).join('')}</div></div>`;
+const tog=(label,path,desc)=>`<label class="tog"><input type="checkbox" data-bind="${path}" data-re ${get(path)?'checked':''}><span class="sw"></span><span><b>${label}</b>${desc?`<small>${desc}</small>`:''}</span></label>`;
+const note=(kind,icon,html)=>`<div class="note ${kind}">${I[icon]}<div>${html}</div></div>`;
+const agentNote=html=>`<div class="note agent">${I.spark}<div><div class="who">Runway agent</div>${html}</div></div>`;
+
+/* ---------- views ---------- */
+function render(){
+  const a=$('#app');
+  if(S.view==='login'){a.innerHTML=loginView();return}
+  a.innerHTML=topbar()+({wizard:wizardView,deploy:deployView,monitor:monitorView,history:historyView})[S.view]()+(S.agentOpen?drawer():'');
+  if(S.view==='wizard')updateSpec(true);
+  if(S.view==='deploy'){const t=$('.term-b');if(t)t.scrollTop=t.scrollHeight}
+  if(S.agentOpen){const m=$('.msgs');m.scrollTop=m.scrollHeight}
+}
+function loginView(){return `
+<div class="login">
+  <div class="login-art">
+    <div class="brand" style="color:#fff">${logo}<span>Runway</span></div>
+    <div>
+      <h1>Ship any repo to any cloud, and see exactly what happened.</h1>
+      <p>Answer a few questions, review the plan, deploy in one click. When something breaks, the agent reads the logs and tells you why.</p>
+    </div>
+    <pre><span class="c"># runway.yaml</span>
+<span class="k">cloud:</span> aws  <span class="c"># ap-south-1</span>
+<span class="k">source:</span> github.com/acme/payments-api@main
+<span class="k">target:</span> ecs-fargate
+<span class="k">build:</span> docker <span class="c"># generated by agent</span>
+<span class="k">iac:</span> terraform
+<span class="k">pipeline:</span> github-actions, tests, approval</pre>
+  </div>
+  <div class="login-form">
+    <form id="loginForm" novalidate>
+      <div><h2>Sign in</h2><p class="muted" style="margin-top:6px">Use your work account to continue.</p></div>
+      <div class="sso"><button type="button" class="btn" data-action="sso">GitHub</button><button type="button" class="btn" data-action="sso">Google</button></div>
+      <button type="button" class="btn" data-action="sso">Single sign-on (SAML / OIDC)</button>
+      <div class="or">or with email</div>
+      <label class="fld"><span>Work email</span><input type="email" id="em" placeholder="you@company.com" autocomplete="email"></label>
+      <label class="fld"><span>Password</span><input type="password" id="pw" autocomplete="current-password"></label>
+      <p class="err" id="lerr" role="alert"></p>
+      <button class="btn primary" type="submit">Sign in</button>
+      <p class="muted" style="font-size:13px">Two-factor authentication is required for accounts that can deploy to production. This is a prototype: any email and password will work.</p>
+    </form>
+  </div>
+</div>`}
+function topbar(){
+  const nav=[['wizard','New deployment'],['history','Deployments'],['monitor','Monitoring']];
+  return `<header class="top">
+  <div class="brand">${logo}<span class="bn">Runway</span></div><span class="tag">Prototype</span>
+  <nav class="nav" aria-label="Main">${nav.map(([v,t])=>`<button data-action="go" data-val="${v}" ${S.view===v||(v==='wizard'&&S.view==='deploy')?'aria-current="page"':''}>${t}</button>`).join('')}</nav>
+  <div class="spacer"></div>
+  <button class="btn small" data-action="agent">${I.spark}<span class="lbl">Ask agent</span></button>
+  <div class="avatar" title="${esc(S.user)}">${esc((S.user[0]||'U').toUpperCase())}</div>
+</header>`}
+
+function wizardView(){
+  return `<div class="wiz">
+  <aside class="rail" aria-label="Steps"><ol>${STEPS.map((s,i)=>`<li class="${i<S.step&&i<=S.far?'done':''} ${i===S.step?'cur':''}"><button data-action="jump" data-val="${i}" ${i>S.far?'disabled':''} ${i===S.step?'aria-current="step"':''}><span class="n">${i<S.step?'✓':i+1}</span>${s}</button></li>`).join('')}</ol></aside>
+  <main class="main" id="main">${stepView()}
+    <div class="foot">
+      ${S.step>0?'<button class="btn" data-action="back">Back</button>':''}
+      <p class="err" role="alert">${esc(S.err)}</p>
+      <button class="btn ghost spec-toggle" data-action="spec">View spec</button>
+      ${S.step<7?'<button class="btn primary" data-action="next">Continue</button>':`<button class="btn primary" data-action="deploy">Deploy to ${esc(S.target.env)}</button>`}
+    </div>
+  </main>
+  <aside class="spec ${S.specOpen?'open':''}" aria-label="Deploy spec">
+    <div class="spec-h"><div><h3>runway.yaml</h3><small>Written as you answer. This is exactly what gets deployed.</small></div><button class="btn small ghost spec-toggle" data-action="spec">Close</button></div>
+    <pre id="spec"></pre>
+  </aside></div>`}
+
+function stepView(){
+  const c=CL();
+  switch(S.step){
+  case 0:return `<div class="head"><h1>Where should this run?</h1><p>Pick the cloud account you'll deploy into. You can add more clouds to the same project later.</p></div>
+    <div class="opts">${Object.entries(CLOUDS).map(([k,v])=>`<button class="opt" aria-pressed="${S.cloud===k}" data-set="cloud" data-val="${k}"><span class="mk">${v.mk}</span><b>${v.name}</b><small>${[v.svc.container,v.svc.k8s,v.svc.serverless,v.svc.vm].join(', ')}</small></button>`).join('')}</div>`;
+  case 1:{const m=S.access.method;let f='';
+    if(m==='role')f=`<div class="row">${fld('AWS account ID','access.accountId',{ph:'123456789012',mono:1})}${fld('External ID','access.externalId',{mono:1,ro:1,hint:'Generated for you. Paste it into the role trust policy.'})}</div>${fld('Role ARN','access.roleArn',{ph:'arn:aws:iam::123456789012:role/RunwayDeployer',mono:1,hint:'Launch our CloudFormation template to create this role with least-privilege permissions, then paste its ARN.'})}`;
+    if(m==='keys')f=`<div class="row">${fld('Access key ID','access.keyId',{ph:'AKIA…',mono:1})}${fld('Secret access key','access.secret',{type:'password',mono:1})}</div>`+note('warn','warn','Long-lived keys are encrypted in Vault and only injected into the deployment sandbox. Rotate them every 90 days, or switch to a cross-account role.');
+    if(m==='wif')f=`${fld('Project ID','access.project',{ph:'acme-prod-4821',mono:1})}${fld('Workload identity provider','access.provider',{ph:'projects/…/locations/global/workloadIdentityPools/runway/providers/runway',mono:1})}${fld('Service account email','access.saEmail',{ph:'runway-deployer@acme-prod.iam.gserviceaccount.com',mono:1})}`;
+    if(m==='sa')f=`${fld('Project ID','access.project',{ph:'acme-prod-4821',mono:1})}<label class="fld"><span>Service account key (JSON)</span><textarea data-bind="access.saJson" placeholder='{ "type": "service_account", … }'>${esc(S.access.saJson)}</textarea></label>`+note('warn','warn','Key files never expire on their own. Workload identity federation avoids storing one.');
+    if(m==='fed'||m==='secret')f=`<div class="row">${fld('Tenant ID','access.tenant',{mono:1})}${fld('Client ID','access.client',{mono:1})}</div>${fld('Subscription ID','access.sub',{mono:1})}${m==='secret'?fld('Client secret','access.clientSecret',{type:'password',mono:1}):''}`;
+    if(m==='token')f=fld(S.cloud==='oci'?'API signing key fingerprint':'API token','access.token',{type:'password',mono:1,hint:'Create a token scoped to the resources this project needs.'});
+    return `<div class="head"><h1>Connect ${c.name}</h1><p>Each deployment runs in a short-lived sandbox. Credentials are injected at run time and never written to disk.</p></div>
+    <div class="stack">${c.methods.length>1?seg('How should Runway sign in?','access.method',c.methods.map(([v,t],i)=>[v,i===0?t+' (recommended)':t])):''}
+    ${f}
+    ${sel('Default region','access.region',c.regions,false)}
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" data-action="test" ${S.access.testing?'disabled':''}>${S.access.testing?'Testing…':'Test connection'}</button></div>
+    ${S.access.connected?note('ok','check',`<b>Connected.</b> Permission check passed for 14 of 14 required actions in ${esc(S.access.region)}.`):''}</div>`;}
+  case 2:{const p=S.repo.provider;const pn={github:'GitHub',bitbucket:'Bitbucket',gitlab:'GitLab'}[p];
+    const scopes={github:'repo, workflow, read:org',bitbucket:'repository:read, pipeline:write, webhook',gitlab:'read_repository, api'}[p];
+    return `<div class="head"><h1>Connect your code</h1><p>Runway reads the repository to detect your stack, and writes the pipeline file back if you want one.</p></div>
+    <div class="stack">${seg('Repository provider','repo.provider',[['github','GitHub'],['bitbucket','Bitbucket'],['gitlab','GitLab']])}
+    ${seg('Access method','repo.auth',[['app',p==='github'?'Install GitHub App (recommended)':`${pn} OAuth (recommended)`],['token','Access token']])}
+    ${S.repo.auth==='token'?fld(`${pn} access token`,'repo.token',{type:'password',mono:1,hint:`Required scopes: ${scopes}`}):''}
+    ${!S.repo.connected?`<div><button class="btn" data-action="connectRepo">${S.repo.auth==='token'?'Verify token':'Connect '+pn}</button></div>`:note('ok','check',`Connected to ${pn}. 3 repositories available.`)}
+    ${S.repo.connected?`<div class="row">${sel('Repository','repo.name',[['','Choose a repository'],...REPOS])}${sel('Deployment branch','repo.branch',['main','develop','release/1.4'],false)}</div>`:''}
+    ${S.repo.scanned?agentNote(`I scanned <b>${esc(S.repo.name)}</b>: Node.js 20 with Express, a <code>start</code> script in package.json, and a Jest test suite. There's no Dockerfile, so I'll generate one. I couldn't find the port your server listens on, so I'm assuming 3000. Change it on the Build step if that's wrong.`):''}</div>`;}
+  case 3:return `<div class="head"><h1>How should it run?</h1><p>Service names below are for ${c.name}. Runway picks sensible defaults for each target that you can change later.</p></div>
+    <div class="stack">${S.repo.scanned?agentNote(`For an Express API, a containerised web service on <b>${c.svc.container}</b> is the simplest option with autoscaling and zero-downtime deploys.`):''}
+    <div class="opts">${TYPES.map(([k,t,d])=>`<button class="opt" aria-pressed="${S.target.type===k}" data-set="target.type" data-val="${k}">${k==='container'&&S.repo.scanned?'<span class="rec">Suggested</span>':''}<b>${t}</b><small>${c.svc[k]}</small><small>${d}</small></button>`).join('')}</div>
+    ${seg('Environment','target.env',[['dev','Development'],['staging','Staging'],['production','Production']])}</div>`;
+  case 4:{const df=dockerfile();
+    return `<div class="head"><h1>Build settings</h1><p>Detected from your repository. Adjust anything that doesn't match how you run the app locally.</p></div>
+    <div class="stack"><div class="row">${sel('Stack','build.stack',Object.keys(STACKS))}${fld('Runtime version','build.version',{mono:1})}</div>
+    ${seg('Container image','build.docker',[['existing','Use my Dockerfile'],['generate','Generate one for me'],['none','No container (buildpacks)']])}
+    ${S.build.docker==='generate'?`<div class="fld"><span>Generated Dockerfile</span><pre class="code">${esc(df)}</pre><small>Committed to a branch for review when you deploy. You can edit it afterwards like any other file.</small></div>`:''}
+    <div class="row">${fld('Build command','build.buildCmd',{mono:1})}${isStatic()?fld('Output folder','build.outDir',{mono:1}):fld('Start command','build.start',{mono:1})}</div>
+    ${isStatic()?'':fld('Port your app listens on','build.port',{mono:1,ph:'3000',hint:'Used for the container, load balancer and health checks.'})}</div>`;}
+  case 5:{const k8s=S.target.type==='k8s';
+    return `<div class="head"><h1>Infrastructure</h1><p>Everything is created as code in your account, so you can inspect, version and tear it down without Runway.</p></div>
+    <div class="stack">${seg('Infrastructure as code','infra.iac',[['terraform','Terraform'],['tofu','OpenTofu'],['none','Skip, create resources directly']])}
+    ${S.infra.iac!=='none'?sel('Where to keep state','infra.state',[['customer',`A bucket in your ${c.name} account (recommended)`],['runway','Runway-managed backend']],false):''}
+    ${k8s?seg('Kubernetes cluster','infra.cluster',[['new',`Create a new ${c.svc.k8s} cluster`],['existing','Use an existing cluster']]):''}
+    ${k8s&&S.infra.cluster==='existing'?fld('Cluster name','infra.clusterName',{mono:1,ph:'prod-cluster-01'}):''}
+    ${k8s?`<div class="row">${fld('Namespace','infra.ns',{mono:1})}</div>`+tog('Package with Helm','infra.helm','Generates a chart with values per environment.'):''}
+    ${seg('Instance size','infra.size',Object.entries(SIZES).map(([k,v])=>[k,`${v[0]}, ${v[1]}`]))}
+    <div class="row">${fld('Minimum instances','infra.min',{type:'number'})}${fld('Maximum instances','infra.max',{type:'number',hint:'Scales on CPU above 70%.'})}</div>
+    ${sel('Managed database','infra.db',[['none','None'],['postgres','PostgreSQL'],['mysql','MySQL'],['redis','Redis'],['mongodb','MongoDB compatible']],false)}
+    ${fld('Custom domain (optional)','infra.domain',{ph:'api.example.com',mono:1})}
+    ${S.infra.domain?tog('Issue a TLS certificate','infra.tls','Certificate is renewed automatically.'):''}</div>`;}
+  case 6:{const native={github:'GitHub Actions',bitbucket:'Bitbucket Pipelines',gitlab:'GitLab CI'}[S.repo.provider];
+    return `<div class="head"><h1>Pipeline</h1><p>How future changes get from your branch to ${esc(S.target.env)}.</p></div>
+    <div class="stack">${seg('Run the pipeline in','pipe.ci',[['native',`${native} (commits a pipeline file)`],['runway','Runway runners']])}
+    ${seg('Deploy when','pipe.trigger',[['push',`Code is pushed to ${S.repo.branch}`],['tag','A version tag is created'],['manual','I click deploy']])}
+    <div>${tog('Run tests before deploying','pipe.tests','A failing test stops the deployment.')}
+    ${S.pipe.tests?`<div style="padding:0 0 12px 48px">${fld('Test command','pipe.testCmd',{mono:1})}</div>`:''}
+    ${tog('Scan for vulnerabilities','pipe.scan','Checks the image and infrastructure code for known issues and risky settings.')}
+    ${tog('Require approval for production','pipe.approval','Someone with the deployer role approves the plan before it is applied.')}
+    ${tog('Roll back automatically on failure','pipe.rollback','Restores the last healthy version if health checks fail.')}</div>
+    ${sel('Send deployment updates to','pipe.notify',['Slack','Microsoft Teams','Email','Nowhere'],false)}
+    <div class="fld"><span>Environment variables</span>
+    <div class="stack" style="gap:8px">${S.pipe.env.map((e,i)=>`<div class="env-row"><input type="text" class="mono" data-bind="pipe.env.${i}.k" value="${esc(e.k)}" placeholder="KEY" aria-label="Variable name"><input type="${e.s?'password':'text'}" class="mono" data-bind="pipe.env.${i}.v" value="${esc(e.v)}" placeholder="value" aria-label="Variable value"><label class="chk"><input type="checkbox" data-bind="pipe.env.${i}.s" data-re ${e.s?'checked':''}> Secret</label><button class="btn small ghost" data-action="rmEnv" data-val="${i}" aria-label="Remove ${esc(e.k||'variable')}">Remove</button></div>`).join('')}</div>
+    <div><button class="btn small" data-action="addEnv">Add variable</button></div><small>Secrets are stored in ${S.cloud==='aws'?'AWS Secrets Manager':S.cloud==='gcp'?'Secret Manager':S.cloud==='azure'?'Key Vault':'your cloud secret store'}, not in the pipeline file.</small></div></div>`;}
+  case 7:{const r=resources(),cost=estimate();const keys=S.access.method==='keys'||S.access.method==='sa'||S.access.method==='secret';
+    return `<div class="head"><h1>Review the plan</h1><p>Nothing has been created yet. Check the plan, then deploy.</p></div>
+    <div class="stack"><div class="sum">
+      <section><h3>Source</h3><dl><dt>Repository</dt><dd>${esc(S.repo.name)}</dd><dt>Branch</dt><dd>${esc(S.repo.branch)}</dd><dt>Stack</dt><dd>${esc(S.build.stack)} ${esc(S.build.version)}</dd></dl></section>
+      <section><h3>Destination</h3><dl><dt>Cloud</dt><dd>${c.name}</dd><dt>Region</dt><dd>${esc(S.access.region)}</dd><dt>Runs on</dt><dd>${esc(svcName())}</dd><dt>Environment</dt><dd>${esc(S.target.env)}</dd></dl></section>
+      <section><h3>Pipeline</h3><dl><dt>Runs in</dt><dd>${esc(ciName())}</dd><dt>Tests</dt><dd>${S.pipe.tests?'Yes':'No'}</dd><dt>Approval</dt><dd>${S.pipe.approval?'Production':'None'}</dd><dt>Rollback</dt><dd>${S.pipe.rollback?'Automatic':'Manual'}</dd></dl></section>
+    </div>
+    <section class="panel"><div class="panel-h"><h3>${iacName()?iacName()+' will create':'Runway will create'} ${r.length} resources</h3></div><ul class="list">${r.map(x=>`<li>${I.check}<span>${esc(x)}</span></li>`).join('')}</ul></section>
+    <div class="sum">
+      <section><h3>Estimated cost</h3><div class="cost" style="margin-top:6px"><b>$${cost}</b><span class="muted">per month at minimum scale</span></div><small class="muted" style="font-size:13px">Before tax and data transfer. Priced with Infracost in the full product.</small></section>
+      <section><h3>Policy checks</h3><ul class="list" style="margin-top:8px"><li>${I.check}<span>No public storage buckets</span></li><li>${I.check}<span>No SSH open to the internet</span></li><li>${I.check}<span>Encryption at rest enabled</span></li>${keys?`<li style="color:var(--warn)">${I.warn}<span>Long-lived credentials in use</span></li>`:''}</ul></section>
+    </div>
+    <label class="tog"><input type="checkbox" data-bind="reviewed" data-re ${S.reviewed?'checked':''}><span class="sw"></span><span><b>I've reviewed this plan</b><small>Required before Runway can make changes to your ${c.name} account.</small></span></label></div>`;}
+  }
+}
+
+function dockerfile(){
+  const st=S.build.stack,v=S.build.version,p=S.build.port||'3000';
+  if(st==='Python')return `FROM python:${v}-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE ${p}\nCMD ${JSON.stringify(S.build.start.split(' ').concat(['--bind','0.0.0.0:'+p]))}`;
+  if(st==='Go')return `FROM golang:${v}-alpine AS build\nWORKDIR /src\nCOPY . .\nRUN ${S.build.buildCmd}\n\nFROM gcr.io/distroless/static\nCOPY --from=build /src/app /app\nEXPOSE ${p}\nENTRYPOINT ["/app"]`;
+  if(st==='Java (Spring Boot)')return `FROM eclipse-temurin:${v}-jdk AS build\nWORKDIR /src\nCOPY . .\nRUN ${S.build.buildCmd}\n\nFROM eclipse-temurin:${v}-jre\nCOPY --from=build /src/target/*.jar /app.jar\nEXPOSE ${p}\nENTRYPOINT ["java","-jar","/app.jar"]`;
+  if(st==='React / Vue / Angular')return `FROM node:${v}-alpine AS build\nWORKDIR /app\nCOPY . .\nRUN ${S.build.buildCmd}\n\nFROM nginx:alpine\nCOPY --from=build /app/${S.build.outDir} /usr/share/nginx/html`;
+  if(st==='Node.js')return `FROM node:${v}-alpine AS build\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build --if-present\n\nFROM node:${v}-alpine\nWORKDIR /app\nCOPY --from=build /app ./\nENV NODE_ENV=production PORT=${p}\nEXPOSE ${p}\nCMD ["npm","start"]`;
+  return `# Base image for ${st} ${v}\nWORKDIR /app\nCOPY . .\nRUN ${S.build.buildCmd}\nEXPOSE ${p}\nCMD ${JSON.stringify(S.build.start.split(' '))}`;
+}
+function resources(){
+  const r=CL().res,t=S.target.type,out=[];
+  if(S.infra.iac!=='none')out.push(`State bucket and lock (${S.infra.state==='customer'?'in your account':'Runway-managed'})`);
+  if(t!=='static'&&t!=='serverless')out.push(r.net);
+  if(S.build.docker!=='none'&&t!=='static')out.push(r.registry);
+  if(t==='container')out.push(`${CL().svc.container} service (${S.infra.min} to ${S.infra.max} instances)`,r.lb);
+  if(t==='k8s'){if(S.infra.cluster==='new')out.push(`${CL().svc.k8s} cluster with 2 nodes`);out.push(`${S.infra.helm?'Helm release':'Deployment and service'} in namespace ${S.infra.ns}`,r.lb);}
+  if(t==='serverless')out.push(`${CL().svc.serverless} function with HTTPS endpoint`);
+  if(t==='vm')out.push(`${CL().svc.vm} instance group (${S.infra.min} to ${S.infra.max})`,r.lb);
+  if(t==='static')out.push(CL().svc.static);
+  if(S.infra.db!=='none')out.push(`Managed ${({postgres:'PostgreSQL',mysql:'MySQL',redis:'Redis',mongodb:'MongoDB compatible'})[S.infra.db]} instance`);
+  if(t!=='static')out.push(r.iam);
+  out.push(r.logs);
+  if(S.infra.domain)out.push(`DNS record and ${S.infra.tls?'TLS certificate':'HTTP listener'} for ${S.infra.domain}`);
+  return out;
+}
+function estimate(){
+  const t=S.target.type;if(t==='static')return 3;if(t==='serverless')return 5+(S.infra.db!=='none'?28:0);
+  let c=SIZES[S.infra.size][2]*Math.max(1,+S.infra.min||1);
+  if(t==='container'||t==='k8s'||t==='vm')c+=18;
+  if(t==='k8s'&&S.infra.cluster==='new')c+=73;
+  c+=({none:0,postgres:30,mysql:30,redis:15,mongodb:25})[S.infra.db];
+  return c;
+}
+
+/* spec */
+function specLines(){
+  const u='~ # not set yet',a=S.access,c=S.cloud?CL():null;
+  const v=x=>x===''||x==null?u:x;
+  const L=[['# runway.yaml, generated '+new Date().toISOString().slice(0,10),'c'],
+    [`project: ${project()}`],[`environment: ${S.target.env}`],['cloud:'],
+    [`  provider: ${v(S.cloud)}`],[`  region: ${v(a.region)}`],[`  auth: ${v(a.method&&c?c.methods.find(m=>m[0]===a.method)?.[1].toLowerCase().replace(/ /g,'-'):'')}`],
+    [`  verified: ${a.connected}`],['source:'],[`  provider: ${S.repo.provider}`],[`  repo: ${v(S.repo.name)}`],[`  branch: ${S.repo.branch}`],
+    ['target:'],[`  type: ${v(S.target.type)}`],[`  service: ${v(S.target.type&&c?svcName():'')}`],
+    ['build:'],[`  stack: ${S.build.stack} ${S.build.version}`],[`  image: ${S.build.docker==='generate'?'dockerfile (generated)':S.build.docker==='existing'?'dockerfile':'buildpacks'}`],
+    [`  build: ${S.build.buildCmd}`]];
+  if(isStatic())L.push([`  output: ${S.build.outDir}`]);else L.push([`  start: ${v(S.build.start)}`],[`  port: ${v(S.build.port)}`]);
+  L.push(['infrastructure:'],[`  iac: ${S.infra.iac==='none'?'none':S.infra.iac==='tofu'?'opentofu':'terraform'}`]);
+  if(S.infra.iac!=='none')L.push([`  state: ${S.infra.state==='customer'?'customer-bucket':'runway-managed'}`]);
+  if(S.target.type==='k8s')L.push(['  kubernetes:'],[`    cluster: ${S.infra.cluster==='new'?'create':v(S.infra.clusterName)}`],[`    namespace: ${S.infra.ns}`],[`    helm: ${S.infra.helm}`]);
+  L.push([`  size: ${S.infra.size}  # ${SIZES[S.infra.size][1]}`],[`  scaling: { min: ${S.infra.min}, max: ${S.infra.max} }`],[`  database: ${S.infra.db}`],[`  domain: ${S.infra.domain||'none'}`]);
+  L.push(['pipeline:'],[`  runs_in: ${S.pipe.ci==='runway'?'runway':S.repo.provider==='github'?'github-actions':S.repo.provider==='bitbucket'?'bitbucket-pipelines':'gitlab-ci'}`],
+    [`  trigger: ${S.pipe.trigger==='push'?'push '+S.repo.branch:S.pipe.trigger}`],[`  tests: ${S.pipe.tests?S.pipe.testCmd||u:'off'}`],[`  security_scan: ${S.pipe.scan}`],
+    [`  approval: ${S.pipe.approval?'production':'none'}`],[`  rollback: ${S.pipe.rollback?'automatic':'manual'}`],[`  notify: ${S.pipe.notify.toLowerCase()}`],['env:']);
+  S.pipe.env.filter(e=>e.k).forEach(e=>L.push([`  ${e.k}: ${e.s?'<secret>':e.v||'""'}`]));
+  return L;
+}
+function hl([t,cls]){
+  if(cls==='c')return `<span class="c">${esc(t)}</span>`;
+  const m=t.match(/^(\s*)([\w-]+:)(.*)$/);if(!m)return esc(t);
+  let val=m[3];const i=val.indexOf('~ #');
+  if(i>=0)return `${m[1]}<span class="k">${esc(m[2])}</span><span class="u">${esc(val)}</span>`;
+  const ci=val.indexOf('  #');let cm='';if(ci>=0){cm=val.slice(ci);val=val.slice(0,ci)}
+  return `${m[1]}<span class="k">${esc(m[2])}</span><span class="v">${esc(val)}</span>${cm?`<span class="c">${esc(cm)}</span>`:''}`;
+}
+function updateSpec(first){
+  const el=$('#spec');if(!el)return;const lines=specLines();const txt=lines.map(l=>l[0]);
+  el.innerHTML=lines.map((l,i)=>`<span class="l ${!first&&prevSpec.length&&prevSpec[i]!==txt[i]?'fresh':''}">${hl(l)}</span>`).join('');
+  prevSpec=txt;
+}
+
+/* deploy */
+function L(t,m){return {t,m}}
+function willFail(){return !D.fixed&&S.build.stack==='Node.js'&&S.build.port!=='8080'&&!isStatic()}
+function stagesFor(){
+  const c=CL(),r=c.res,p=S.build.port,svc=svcName(),iac=iacName()||'Runway',tag='sha-8f3c2a1',n=resources().length;
+  const st=[
+    {id:'clone',name:'Clone repository',logs:[L('cmd',`$ git clone --depth 1 -b ${S.repo.branch} git@${S.repo.provider}.com:${S.repo.name}.git`),L('dim','Cloning into /workspace/src... done.'),L('dim','HEAD is now at 8f3c2a1 Add payments webhook handler')]},
+    {id:'test',name:'Run tests',skip:!S.pipe.tests,logs:[L('cmd',`$ ${S.pipe.testCmd}`),L('dim','PASS  test/payments.test.js (4.1 s)'),L('dim','PASS  test/health.test.js'),L('okl','Tests: 38 passed, 38 total')]},
+    {id:'build',name:isStatic()?'Build site':'Build image',logs:isStatic()?[L('cmd',`$ ${S.build.buildCmd}`),L('dim',`Build output written to ${S.build.outDir}/ (412 kB)`)]:[L('cmd',`$ docker buildx build -t ${project()}:${tag} .`),L('dim',`#1 [build 1/5] FROM node:${S.build.version}-alpine`),L('dim','#6 [build 4/5] RUN npm ci  added 312 packages in 9s'),L('dim','#9 exporting to image  done'),S.pipe.scan?L('dim','Image scan: 0 critical, 0 high, 2 medium (not blocking)'):L('dim','Image scan skipped')]},
+    {id:'push',name:isStatic()?'Upload artifacts':'Push image',logs:[L('cmd',`$ push ${r.registry.toLowerCase().replace(/ /g,'-')}/${project()}:${tag}`),L('dim','sha256:4be1c09a... pushed (78.4 MB)')]},
+    {id:'plan',name:`Plan with ${iac}`,logs:[L('cmd',S.infra.iac==='none'?'$ runway plan':`$ ${S.infra.iac==='tofu'?'tofu':'terraform'} plan -out=tfplan`),L('dim',`Initializing backend (${S.infra.state==='customer'?'customer bucket':'runway-managed'})...`),L('dim',`Plan: ${n} to add, 0 to change, 0 to destroy.`),S.pipe.scan?L('okl','Policy checks passed (Checkov, 0 failed)'):L('dim','Policy checks skipped')]},
+    {id:'apply',name:'Create infrastructure',logs:[L('cmd',S.infra.iac==='none'?'$ runway apply':`$ ${S.infra.iac==='tofu'?'tofu':'terraform'} apply tfplan`),...resources().slice(0,5).map(x=>L('dim',`${x}: Creation complete`)),L('okl',`Apply complete! Resources: ${n} added, 0 changed, 0 destroyed.`)]},
+    {id:'release',name:`Deploy to ${svc}`,logs:[L('cmd',`$ release ${project()}:${tag} to ${svc}`),L('dim',`Registering new revision with container port ${p||'n/a'}`),L('dim',`Starting ${S.infra.min} instance(s) in ${S.access.region}`)]},
+    {id:'health',name:'Health check',logs:[]}
+  ];
+  if(willFail())st[7].logs=[L('dim',`Waiting for targets on port ${p} to report healthy...`),L('dim','Container log: > payments-api@1.4.0 start'),L('warn','Container log: Server listening on port 8080'),L('errl',`Target 10.0.2.41:${p} unhealthy: request timed out (1/3)`),L('errl',`Target 10.0.2.41:${p} unhealthy: request timed out (2/3)`),L('errl',`Target 10.0.2.41:${p} unhealthy: request timed out (3/3)`),L('errl','ERROR Health check failed. Stopping new instances.')];
+  else st[7].logs=[L('dim',`Waiting for targets on port ${p||443} to report healthy...`),L('okl','GET /health 200 in 4 ms (1/2)'),L('okl','GET /health 200 in 3 ms (2/2)'),L('okl',`Deployed. Traffic shifted to revision ${tag}.`)];
+  return st.filter(s=>!s.skip);
+}
+function runDeploy(from=0){
+  const st=stagesFor();
+  D.stages=st.map((s,i)=>({...s,state:i<from?'done':'pending',dur:i<from?'reused':''}));
+  D.status='running';
+  if(from===0){D.log=[];D.started=Date.now()}else D.log.push(L('cmd','--- Redeploying with the fix applied. Reusing image and infrastructure. ---'));
+  let si=from,li=0,t0=Date.now();D.stages[si].state='running';
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    const s=D.stages[si];
+    if(li<s.logs.length){const ln=s.logs[li++];D.log.push(ln);appendLog(ln);return}
+    s.dur=((Date.now()-t0)/1000).toFixed(1)+'s';t0=Date.now();
+    if(s.id==='health'&&willFail()){s.state='failed';D.status='failed';clearInterval(timer);addHistory('Failed');if(S.view==='deploy')render();return}
+    s.state='done';si++;li=0;
+    if(si>=D.stages.length){D.status='success';clearInterval(timer);addHistory('Succeeded');if(S.view==='deploy')render();return}
+    D.stages[si].state='running';renderStages();
+  },260);
+  render();
+}
+function appendLog(ln){const t=$('.term-b');if(!t)return;const d=document.createElement('div');d.className=({cmd:'cmd',dim:'dim',warn:'warn',errl:'errl',okl:'okl'})[ln.t]||'';d.textContent=ln.m;t.appendChild(d);t.scrollTop=t.scrollHeight}
+function renderStages(){const e=$('#stages');if(e)e.innerHTML=stagesHTML();const p=$('#dpill');if(p)p.outerHTML=pillHTML()}
+function stagesHTML(){return D.stages.map(s=>`<li class="${s.state}"><span class="st" aria-hidden="true"></span><span>${esc(s.name)}<span class="sr"> ${s.state}</span></span><span class="dur">${esc(s.dur)}</span></li>`).join('')}
+function pillHTML(){const m={running:['run','Deploying'],failed:['bad','Failed'],success:['ok','Deployed'],idle:['','Idle']}[D.status];return `<span id="dpill" class="pill ${m[0]}"><span class="dot"></span>${m[1]}</span>`}
+function addHistory(status){S.history.unshift({id:'#'+(1040+S.history.length),repo:S.repo.name,branch:S.repo.branch,env:S.target.env,cloud:CL().name,svc:svcName(),status,when:new Date(),dur:((Date.now()-D.started)/1000).toFixed(0)+'s'})}
+function deployView(){
+  const url=S.infra.domain?`https://${S.infra.domain}`:`https://${project()}-${S.target.env}.${S.cloud==='aws'?S.access.region+'.elb.amazonaws.com':S.cloud==='gcp'?'a.run.app':'runway.app'}`;
+  const failed=D.status==='failed',ok=D.status==='success';
+  return `<div class="page">
+  <div class="dhead"><div><h1>${esc(S.repo.name)}</h1><p>${esc(S.repo.branch)} to ${esc(svcName())} in ${esc(S.access.region)}, ${esc(S.target.env)}</p></div>${pillHTML()}</div>
+  ${failed?`<div class="result bad" role="alert"><h2>Health check failed</h2>
+    <div class="diag"><div class="who" style="font-weight:600;color:var(--accent);font-size:13px">Runway agent diagnosis</div>
+    <p>Your app started correctly, but it's listening on port <code>8080</code> while the service and load balancer are checking port <code>${esc(S.build.port)}</code>. Every health check timed out, so no traffic was sent to the new version.</p>
+    <p>Evidence: <code>server.js:12</code> calls <code>app.listen(process.env.PORT || 8080)</code>, and <code>PORT</code> isn't set in your environment variables.</p>
+    <p><b>Fix:</b> set the container port to 8080 and add <code>PORT=8080</code>. The image and infrastructure are fine, so the redeploy only repeats the last two steps.</p></div>
+    <p class="muted" style="font-size:14px">${S.pipe.rollback?'Rollback: this is the first release, so there was no earlier version to restore. The failed instances were stopped.':'Automatic rollback is off. The failed instances were stopped.'}</p>
+    <div class="acts"><button class="btn primary" data-action="fix">Apply fix and redeploy</button><button class="btn" data-action="agentAsk" data-val="Why did the health check fail?">Ask the agent</button><button class="btn ghost" data-action="go" data-val="wizard">Edit settings</button></div></div>`:''}
+  ${ok?`<div class="result good"><h2>Deployed</h2><p>Live at <a href="#" class="mono" style="color:var(--accent)" onclick="return false">${esc(url)}</a>. Total time ${esc(S.history[0]?.dur||'')}.${D.fixed?' Port fix saved to your deploy spec and committed as a pull request.':''}</p>
+    <div class="acts"><button class="btn primary" data-action="go" data-val="monitor">Open monitoring</button><button class="btn" data-action="go" data-val="history">View all deployments</button></div></div>`:''}
+  <div class="dgrid">
+    <ol class="stages" id="stages" aria-label="Deployment steps">${stagesHTML()}</ol>
+    <div class="term"><div class="term-h"><span>Deployment log</span><span>${esc(CL().res.logs)}</span></div><div class="term-b" role="log" aria-live="polite">${D.log.map(l=>`<div class="${({cmd:'cmd',dim:'dim',warn:'warn',errl:'errl',okl:'okl'})[l.t]||''}">${esc(l.m)}</div>`).join('')}</div></div>
+  </div></div>`;
+}
+
+/* monitoring */
+function rng(seed){let s=seed;return()=>((s=Math.imul(s^s>>>15,s|1)^(s+Math.imul(s^s>>>7,s|61)),((s^s>>>14)>>>0)/4294967296))}
+function series(n,base,amp,seed,spike){const r=rng(seed);let v=base;return Array.from({length:n},(_,i)=>{v+=(r()-.5)*amp;v=Math.max(base*.4,Math.min(base*1.8,v));return +(spike&&i>n*.62&&i<n*.7?v*1.9:v).toFixed(1)})}
+function chart(title,unit,data,color){
+  const w=300,h=110,max=Math.max(...data)*1.15,min=0,x=i=>i/(data.length-1)*w,y=v=>h-(v-min)/(max-min)*h;
+  const d=data.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+  const last=data[data.length-1];
+  return `<div class="chart"><h3>${title}<span>${last}${unit}</span></h3><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${title}, latest ${last}${unit}">
+  ${[.25,.5,.75].map(g=>`<line x1="0" x2="${w}" y1="${h*g}" y2="${h*g}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')}
+  <path d="${d} L${w} ${h} L0 ${h}Z" fill="${color}" opacity=".12"/><path d="${d}" fill="none" stroke="${color}" stroke-width="1.8" vector-effect="non-scaling-stroke"/></svg></div>`;
+}
+const LOGS=[['INFO','GET /health 200 3ms'],['INFO','POST /v1/payments 201 84ms'],['INFO','GET /v1/payments/pay_8Hk2 200 21ms'],['WARN','Slow query on payments table (412ms)'],['INFO','Webhook received: charge.succeeded'],['ERROR','Webhook signature mismatch from 203.0.113.9'],['INFO','POST /v1/refunds 201 97ms'],['WARN','Connection pool at 80% (16/20)'],['INFO','GET /v1/customers 200 35ms'],['INFO','Autoscaler: CPU 74% above target, adding 1 instance'],['ERROR','Upstream timeout calling ledger-service after 5000ms'],['INFO','GET /health 200 2ms']];
+function monitorView(){
+  if(!S.history.some(h=>h.status==='Succeeded'))return `<div class="page"><div class="empty"><h2>No live services yet</h2><p class="muted">Monitoring starts after your first successful deployment. Metrics and logs are pulled from your cloud provider.</p><button class="btn primary" data-action="go" data-val="wizard">Start a deployment</button></div></div>`;
+  const n={'1h':30,'6h':36,'24h':48}[S.range],sd={'1h':3,'6h':7,'24h':11}[S.range],c=CL();
+  const cpu=series(n,38,14,sd,true),mem=series(n,52,6,sd+1),lat=series(n,120,40,sd+2,true),rq=series(n,640,160,sd+3);
+  const now=Date.now(),lg=LOGS.map((l,i)=>({t:new Date(now-i*47000),lv:l[0],m:l[1]})).filter(l=>(S.lvl==='ALL'||l.lv===S.lvl)&&l.m.toLowerCase().includes(S.q.toLowerCase()));
+  const hh=S.history;
+  return `<div class="page">
+  <div class="dhead"><div><h1>${esc(project())}</h1><p>${esc(svcName())} in ${esc(S.access.region)}, ${esc(S.target.env)}. Data from ${c.res.mon}.</p></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="pill ok"><span class="dot"></span>Healthy</span>
+    <div class="seg" role="radiogroup" aria-label="Time range">${['1h','6h','24h'].map(r=>`<button role="radio" aria-checked="${S.range===r}" data-set="range" data-val="${r}">${r}</button>`).join('')}</div></div></div>
+  <div class="stats">
+    <div class="stat"><small>Requests per minute</small><div>${rq[n-1]}</div><em class="muted">across ${Math.max(2,+S.infra.min)} instances</em></div>
+    <div class="stat"><small>p95 latency</small><div>${lat[n-1]} ms</div><em style="color:var(--ok)">within 300 ms target</em></div>
+    <div class="stat"><small>Error rate</small><div>0.4%</div><em style="color:var(--warn)">2 errors in last 10 min</em></div>
+    <div class="stat"><small>Instances</small><div>${Math.max(2,+S.infra.min)} of ${esc(S.infra.max)}</div><em class="muted">autoscaled 14 min ago</em></div>
+  </div>
+  <div class="charts">${chart('CPU','%',cpu,'var(--accent)')}${chart('Memory','%',mem,'var(--ok)')}${chart('p95 latency',' ms',lat,'var(--warn)')}${chart('Requests per minute','',rq,'var(--accent)')}</div>
+  <div class="two">
+    <section class="panel"><div class="panel-h"><h3>Logs</h3><div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="seg" role="radiogroup" aria-label="Log level">${['ALL','INFO','WARN','ERROR'].map(l=>`<button role="radio" aria-checked="${S.lvl===l}" data-set="lvl" data-val="${l}">${l==='ALL'?'All':l[0]+l.slice(1).toLowerCase()}</button>`).join('')}</div>
+      <input type="text" id="q" placeholder="Search logs" value="${esc(S.q)}" aria-label="Search logs" style="width:180px"></div></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Time</th><th>Level</th><th>Message</th></tr></thead><tbody>${lg.length?lg.map(l=>`<tr><td class="mono">${l.t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})}</td><td><span class="lv ${l.lv}">${l.lv}</span></td><td class="mono" style="white-space:normal">${esc(l.m)}</td></tr>`).join(''):'<tr><td colspan="3" class="muted">No log lines match. Clear the search or pick another level.</td></tr>'}</tbody></table></div>
+      <p style="margin-top:12px"><button class="btn small" data-action="agentAsk" data-val="Explain the errors in these logs">Explain these errors</button></p></section>
+    <section class="panel"><div class="panel-h"><h3>Events</h3></div><ul class="events">
+      <li class="inf"><span class="d"></span><div>Autoscaled to ${Math.max(2,+S.infra.min)} instances<small>14 min ago, CPU above 70%</small></div></li>
+      ${hh.map(h=>`<li class="${h.status==='Succeeded'?'ok':'bad'}"><span class="d"></span><div>Deployment ${h.id} ${h.status.toLowerCase()}<small>${h.when.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}, ${esc(h.branch)}</small></div></li>`).join('')}
+      <li><span class="d"></span><div>Alert rule created: p95 latency above 300 ms<small>Sends to ${esc(S.pipe.notify)}</small></div></li>
+    </ul></section>
+  </div></div>`;
+}
+function historyView(){
+  if(!S.history.length)return `<div class="page"><div class="empty"><h2>No deployments yet</h2><p class="muted">Every deployment you start shows up here with its logs and outcome.</p><button class="btn primary" data-action="go" data-val="wizard">Start a deployment</button></div></div>`;
+  return `<div class="page"><div class="dhead"><div><h1>Deployments</h1><p>All projects and environments.</p></div><button class="btn primary" data-action="new">New deployment</button></div>
+  <section class="panel"><div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Repository</th><th>Branch</th><th>Target</th><th>Environment</th><th>Status</th><th>Duration</th><th>Started</th></tr></thead><tbody>
+  ${S.history.map(h=>`<tr><td class="mono">${h.id}</td><td>${esc(h.repo)}</td><td class="mono">${esc(h.branch)}</td><td>${esc(h.cloud)} ${esc(h.svc)}</td><td>${esc(h.env)}</td><td><span class="pill ${h.status==='Succeeded'?'ok':'bad'}"><span class="dot"></span>${h.status}</span></td><td class="mono">${h.dur}</td><td class="mono">${h.when.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td></tr>`).join('')}
+  </tbody></table></div></section></div>`;
+}
+
+/* agent */
+function drawer(){return `<div class="scrim" data-action="agent"></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="Runway agent">
+  <div class="drawer-h"><div><h3>Runway agent</h3><small class="muted" style="font-size:12.5px">Prototype: replies are scripted</small></div><button class="btn small ghost" data-action="agent">Close</button></div>
+  <div class="msgs" aria-live="polite">${S.chat.map(c=>`<div class="msg ${c.me?'me':''}">${c.me?esc(c.m):c.m}</div>`).join('')}</div>
+  <div class="chips">${['Why did the health check fail?','What will this cost?','Explain the generated Dockerfile','Is it safe to use access keys?'].map(q=>`<button data-action="agentAsk" data-val="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+  <form class="ask" id="askForm"><input type="text" id="askIn" placeholder="Ask about this deployment" aria-label="Message the agent"><button class="btn primary" type="submit">Send</button></form></aside>`}
+function reply(q){q=q.toLowerCase();
+  if(/health|fail|port|why/.test(q))return D.status==='failed'||S.history.some(h=>h.status==='Failed')?'The container logged <code>Server listening on port 8080</code>, but the load balancer was checking port '+esc(S.build.port==='8080'?'3000':S.build.port)+'. In your repo, <code>server.js</code> falls back to 8080 when <code>PORT</code> is unset. Setting the port to 8080 and adding <code>PORT=8080</code> fixes it, which is what the one-click fix does.':'No failures so far. If a deployment fails I read the step logs, the cloud events and your source code together, then propose a specific fix you can apply.';
+  if(/cost|price|bill/.test(q))return `At minimum scale this plan is about <b>$${estimate()}/month</b>. The biggest line items are compute (${SIZES[S.infra.size][1]} per instance)${S.target.type==='k8s'&&S.infra.cluster==='new'?' and the Kubernetes control plane':''}${S.infra.db!=='none'?' and the managed database':''}. Scaling to ${esc(S.infra.max)} instances at peak would add roughly $${SIZES[S.infra.size][2]*Math.max(0,(+S.infra.max)-(+S.infra.min))}.`;
+  if(/docker/.test(q))return 'It uses a two-stage build: dependencies and the build run in the first stage, and only the output is copied into a small runtime image. That keeps the image small and leaves compilers and dev dependencies out of production.';
+  if(/key|safe|secur/.test(q))return 'They work, but a cross-account role (or workload identity on GCP) is safer: nothing long-lived is stored, access can be revoked in your account at any time, and every action is logged in your cloud audit trail under a named role.';
+  if(/error|log/.test(q))return 'Two errors stand out. The webhook signature mismatch comes from a single IP, which usually means a misconfigured test sender, not your code. The ledger-service timeout is worth watching: it lines up with the latency spike, so I would add a circuit breaker or raise the timeout budget.';
+  return 'In the full product I would answer this using your repository, cloud account and logs. In this prototype, try one of the suggested questions.';
+}
+function ask(q){if(!q.trim())return;S.chat.push({me:true,m:q},{me:false,m:reply(q)});S.agentOpen=true;render();setTimeout(()=>$('#askIn')?.focus(),0)}
+
+/* validation + navigation */
+function validate(){
+  switch(S.step){
+  case 0:return S.cloud?'':'Choose a cloud to continue.';
+  case 1:return S.access.connected?'':'Test the connection before continuing.';
+  case 2:if(!S.repo.connected)return 'Connect your repository provider first.';return S.repo.name?'':'Choose a repository.';
+  case 3:return S.target.type?'':'Choose how the app should run.';
+  case 4:if(isStatic())return S.build.outDir?'':'Enter the output folder of your build.';if(!S.build.start)return 'Enter a start command.';return /^\d{2,5}$/.test(S.build.port)?'':'Enter the port your app listens on, for example 3000.';
+  case 5:if(!(+S.infra.min>=1))return 'Set at least 1 minimum instance.';if(+S.infra.max<+S.infra.min)return 'Maximum instances must be at least the minimum.';if(S.target.type==='k8s'&&S.infra.cluster==='existing'&&!S.infra.clusterName)return 'Enter the name of your existing cluster.';return '';
+  case 6:return S.pipe.tests&&!S.pipe.testCmd?'Enter a test command, or turn off tests.':'';
+  case 7:return S.reviewed?'':'Confirm you have reviewed the plan.';
+  }return '';
+}
+function accessMissing(){const a=S.access,m=a.method,need={role:['accountId','roleArn'],keys:['keyId','secret'],wif:['project','provider','saEmail'],sa:['project','saJson'],fed:['tenant','client','sub'],secret:['tenant','client','sub','clientSecret'],token:['token']}[m]||[];return need.filter(k=>!String(a[k]).trim()).length}
+
+const actions={
+  sso(){S.user='engineer@company.com';S.view='wizard';render()},
+  go(el){S.view=el.dataset.val;S.agentOpen=false;render();window.scrollTo(0,0)},
+  new(){S.view='wizard';S.step=0;render()},
+  jump(el){S.step=+el.dataset.val;S.err='';render();window.scrollTo(0,0)},
+  back(){S.step--;S.err='';render();window.scrollTo(0,0)},
+  next(){const e=validate();S.err=e;if(e){render();$('.foot .err')?.scrollIntoView({block:'nearest'});return}S.step++;S.far=Math.max(S.far,S.step);render();window.scrollTo(0,0)},
+  spec(){S.specOpen=!S.specOpen;$('.spec')?.classList.toggle('open',S.specOpen)},
+  test(){const miss=accessMissing();if(miss){S.err=`Fill in ${miss===1?'the missing field':'all '+miss+' missing fields'} before testing.`;render();return}S.err='';S.access.testing=true;render();setTimeout(()=>{S.access.testing=false;S.access.connected=true;render()},1100)},
+  connectRepo(){if(S.repo.auth==='token'&&!S.repo.token.trim()){S.err='Paste an access token first.';render();return}S.err='';S.repo.connected=true;render()},
+  addEnv(){S.pipe.env.push({k:'',v:'',s:false});render()},
+  rmEnv(el){S.pipe.env.splice(+el.dataset.val,1);render()},
+  deploy(){const e=validate();S.err=e;if(e){render();return}D.fixed=false;S.view='deploy';runDeploy(0);window.scrollTo(0,0)},
+  fix(){D.fixed=true;S.build.port='8080';if(!S.pipe.env.some(e=>e.k==='PORT'))S.pipe.env.push({k:'PORT',v:'8080',s:false});const idx=stagesFor().findIndex(s=>s.id==='release');runDeploy(idx)},
+  agent(){S.agentOpen=!S.agentOpen;render();if(S.agentOpen)setTimeout(()=>$('#askIn')?.focus(),0)},
+  agentAsk(el){ask(el.dataset.val)}
+};
+function onSet(p,v){
+  if(p==='cloud'){const c=CLOUDS[v];S.access.method=c.methods[0][0];S.access.region=c.regions[0];S.access.connected=false}
+  if(p==='access.method')S.access.connected=false;
+  if(p==='repo.provider'||p==='repo.auth'){S.repo.connected=false;S.repo.name='';S.repo.scanned=false}
+  if(p==='target.type'&&v==='static'){S.build.stack='React / Vue / Angular';applyStack()}
+}
+function applyStack(){const d=STACKS[S.build.stack];S.build.version=d.v;S.build.buildCmd=d.build;S.build.start=d.start;S.build.port=d.port;if(S.build.stack==='Node.js')S.pipe.testCmd='npm test';else if(S.build.stack==='Python')S.pipe.testCmd='pytest';else if(S.build.stack==='Go')S.pipe.testCmd='go test ./...';}
+
+const app=$('#app');
+app.addEventListener('click',e=>{
+  const s=e.target.closest('[data-set]');
+  if(s){set(s.dataset.set,s.dataset.val);onSet(s.dataset.set,s.dataset.val);S.err='';render();return}
+  const a=e.target.closest('[data-action]');if(a&&actions[a.dataset.action]){e.preventDefault();actions[a.dataset.action](a)}
+});
+app.addEventListener('input',e=>{
+  if(e.target.id==='q'){S.q=e.target.value;const pos=e.target.selectionStart;render();const q=$('#q');q.focus();q.setSelectionRange(pos,pos);return}
+  const el=e.target.closest('[data-bind]');if(!el)return;
+  set(el.dataset.bind,el.type==='checkbox'?el.checked:el.value);
+  if(el.dataset.bind.startsWith('access.')&&el.dataset.bind!=='access.region')S.access.connected=false;
+  if(S.err){S.err='';const fe=$('.foot .err');if(fe)fe.textContent=''}
+  updateSpec(false);
+});
+app.addEventListener('change',e=>{
+  const el=e.target.closest('[data-bind]');if(!el)return;
+  if(el.dataset.bind==='build.stack')applyStack();
+  if(el.dataset.bind==='repo.name'){S.repo.scanned=!!el.value}
+  if(el.hasAttribute('data-re'))render();else updateSpec(false);
+});
+app.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(e.target.id==='loginForm'){const em=$('#em').value.trim(),pw=$('#pw').value;const er=$('#lerr');
+    if(!/^\S+@\S+\.\S+$/.test(em)){er.textContent='Enter a valid work email.';$('#em').focus();return}
+    if(!pw){er.textContent='Enter your password.';$('#pw').focus();return}
+    S.user=em;S.view='wizard';render()}
+  if(e.target.id==='askForm'){ask($('#askIn').value)}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.agentOpen){S.agentOpen=false;render()}});
+render();
+</script>
+</body>
+</html>
