@@ -1,0 +1,63 @@
+[project]
+name = "runway-workspace"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+  "apps/api",
+  "services/worker",
+  "packages/agent",
+  "packages/spec",
+  "packages/cloud",
+  "packages/scm",
+]
+
+[tool.uv.sources]
+runway-spec = { workspace = true }
+runway-agent = { workspace = true }
+runway-cloud = { workspace = true }
+runway-scm = { workspace = true }
+runway-api = { workspace = true }
+runway-worker = { workspace = true }
+
+[dependency-groups]
+dev = [
+  "runway-api",
+  "runway-worker",
+  "runway-agent",
+  "runway-spec",
+  "runway-cloud",
+  "runway-scm",
+  "pytest>=8",
+  "httpx2",
+  "ruff>=0.6",
+  "mypy>=1.11",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["apps/web", "node_modules"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["runway_api", "runway_worker", "runway_agent", "runway_spec", "runway_cloud", "runway_scm"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["apps/api/src", "services/worker/src", "packages/agent/src", "packages/spec/src", "packages/cloud/src", "packages/scm/src"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["apps/api/tests"]
+addopts = "--import-mode=importlib"

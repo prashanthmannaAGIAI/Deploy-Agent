@@ -1,0 +1,23 @@
+{
+  "name": "runway",
+  "private": true,
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @runway/web dev",
+    "dev:api": "uv run --package runway-api uvicorn runway_api.main:app --reload --port 8000",
+    "lint": "pnpm -r lint && uv run ruff check . && uv run ruff format --check .",
+    "format": "prettier --write . && uv run ruff format . && uv run ruff check --fix .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r typecheck && uv run mypy",
+    "test": "pnpm -r test && uv run pytest",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "compose:up": "docker compose -f deploy/docker-compose.yml --env-file .env up -d --wait",
+    "compose:down": "docker compose -f deploy/docker-compose.yml --env-file .env down"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9"
+  }
+}

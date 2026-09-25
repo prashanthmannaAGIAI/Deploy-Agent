@@ -1,0 +1,9 @@
+# Only directories with a package.json become pnpm packages; Python packages are managed by uv.
+packages:
+  - apps/*
+  - packages/*
+
+# Dependency build scripts are denied unless listed here with true.
+allowBuilds:
+  # Ships prebuilt native binaries as optional deps; its postinstall is not needed.
+  unrs-resolver: false
