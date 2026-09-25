@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same branch or PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint, typecheck, unit tests
+    # Pushes to a PR branch already run via `push`; skip the duplicate pull_request run.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - run: uv sync --locked
+
+      - name: Format
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+
+  compose-smoke:
+    name: docker compose smoke test
+    # End-to-end style checks: PRs to main and manual runs only.
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create .env with throwaway secrets
+        run: |
+          cp .env.example .env
+          for key in POSTGRES_PASSWORD KEYCLOAK_ADMIN_PASSWORD KEYCLOAK_WEB_CLIENT_SECRET AUTH_SECRET; do
+            sed -i "s|^${key}=.*|${key}=$(openssl rand -hex 16)|" .env
+          done
+      - name: Start services
+        run: docker compose -f deploy/docker-compose.yml --env-file .env up -d --wait --wait-timeout 300
+      - name: Probe services
+        run: bash deploy/smoke-test.sh
+      - name: Service logs on failure
+        if: failure()
+        run: docker compose -f deploy/docker-compose.yml --env-file .env logs --no-color
+      - name: Stop services
+        if: always()
+        run: docker compose -f deploy/docker-compose.yml --env-file .env down -v
