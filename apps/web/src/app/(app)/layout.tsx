@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { auth, signOut } from "@/auth";
+import { PoweredBy } from "@/components/brand/aiops-logo";
 import { TopBar } from "@/features/shell/top-bar";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -19,6 +20,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <>
       <TopBar email={session.user.email ?? session.user.name ?? ""} signOutAction={signOutAction} />
       {children}
+      <footer className="flex justify-center border-t border-line bg-surface px-5 py-3">
+        <PoweredBy />
+      </footer>
     </>
   );
 }

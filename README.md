@@ -1,6 +1,8 @@
-# Runway
+# AiOps — Your DevOps Agent
 
-An AI agent that deploys an application from a Git repository to your cloud account in one click, then shows what happened.
+An AI agent that deploys an application from a Git repository to your cloud account in one click, then shows what happened. Powered By Zosa Agentic.
+
+"Runway" was the working name and remains in code identifiers (package names, the `runway.yaml` / `runway/v1` spec format, the Keycloak realm id). Everything users see says AiOps.
 
 Status: Phase 1 (web shell and auth). See [docs/PROGRESS.md](docs/PROGRESS.md) for where things stand and [docs/architecture.md](docs/architecture.md) for how the pieces fit.
 
@@ -39,7 +41,7 @@ pnpm compose:down             # stop services (add -v to docker compose down to 
 
 ### Sign in locally
 
-`pnpm compose:up` also runs a one-shot job that creates the dev user from `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` in `.env` (dev only). Open http://localhost:3000, enter that email, click **Continue**, and enter the password on the Runway (Keycloak) sign-in page.
+`pnpm compose:up` also runs a one-shot job that creates the dev user from `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` in `.env` (dev only). Open http://localhost:3000, enter that email, click **Continue**, and enter the password on the AiOps (Keycloak) sign-in page.
 
 Changed the realm file or the dev user? Keycloak only imports the realm on first start: `docker compose -f deploy/docker-compose.yml --env-file .env down` then `docker volume rm runway_keycloak-data` and `pnpm compose:up` again.
 

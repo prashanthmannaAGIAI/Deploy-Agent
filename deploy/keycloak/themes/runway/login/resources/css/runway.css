@@ -1,4 +1,4 @@
-/* Runway tokens from docs/ui-spec.md mapped onto PatternFly 5 variables. */
+/* AiOps login theme: tokens from docs/ui-spec.md mapped onto PatternFly 5 variables. */
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
 
 :root {
@@ -65,10 +65,22 @@ body,
   border-radius: 8px;
 }
 
-#kc-header-wrapper,
-#kc-header-wrapper * {
-  color: var(--rw-ink) !important;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-transform: none;
+/* Header: the AiOps logo instead of the realm name. */
+#kc-header-wrapper {
+  font-size: 0 !important;
+  height: 88px;
+  background: url("../img/aiops-logo.svg") center / contain no-repeat;
+}
+:root.pf-v5-theme-dark #kc-header-wrapper {
+  background-image: url("../img/aiops-logo-on-dark.svg");
+}
+
+/* Footer line shown on every AiOps page. */
+.pf-v5-c-login__container::after {
+  content: "Powered By Zosa Agentic";
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 24px;
+  color: var(--rw-muted);
+  font-size: 12.5px;
 }

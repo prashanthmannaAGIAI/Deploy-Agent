@@ -107,7 +107,7 @@ export function AccessStep() {
       fields = f(
         "Kubeconfig context",
         "kubeContext",
-        "kind-runway",
+        "kind-aiops",
         "A context in your kubeconfig that points at a local kind or k3d cluster.",
       );
       break;
@@ -128,7 +128,7 @@ export function AccessStep() {
           {f(
             "Role ARN",
             "roleArn",
-            "arn:aws:iam::123456789012:role/RunwayDeployer",
+            "arn:aws:iam::123456789012:role/AiOpsDeployer",
             "Launch our CloudFormation template to create this role with least-privilege permissions, then paste its ARN.",
           )}
         </>
@@ -142,7 +142,7 @@ export function AccessStep() {
             <Field label="Secret access key" type="password" mono disabled hint={lockedHint} />
           </FieldRow>
           <Note kind="warn">
-            Long-lived keys are encrypted in Runway&apos;s secret store and only injected into the
+            Long-lived keys are encrypted in the AiOps secret store and only injected into the
             deployment sandbox. Rotate them every 90 days, or switch to a cross-account role.
           </Note>
         </>
@@ -155,12 +155,12 @@ export function AccessStep() {
           {f(
             "Workload identity provider",
             "provider",
-            "projects/…/locations/global/workloadIdentityPools/runway/providers/runway",
+            "projects/…/locations/global/workloadIdentityPools/aiops/providers/aiops",
           )}
           {f(
             "Service account email",
             "saEmail",
-            "runway-deployer@acme-prod.iam.gserviceaccount.com",
+            "aiops-deployer@acme-prod.iam.gserviceaccount.com",
           )}
         </>
       );
@@ -192,7 +192,7 @@ export function AccessStep() {
       <Stack>
         {c.methods.length > 1 && (
           <Segmented
-            label="How should Runway sign in?"
+            label="How should AiOps sign in?"
             value={a.method ?? c.methods[0].value}
             onValueChange={(method) => set({ method })}
             options={c.methods.map((m, i) => ({
@@ -230,7 +230,7 @@ export function RepositoryStep() {
   return (
     <>
       <StepHead title="Connect your code">
-        Runway reads the repository to detect your stack, and writes the pipeline file back if you
+        AiOps reads the repository to detect your stack, and writes the pipeline file back if you
         want one.
       </StepHead>
       <Stack>
@@ -304,8 +304,8 @@ export function TargetStep() {
   return (
     <>
       <StepHead title="How should it run?">
-        Service names below are for {c.name}. Runway picks sensible defaults for each target that
-        you can change later.
+        Service names below are for {c.name}. AiOps picks sensible defaults for each target that you
+        can change later.
       </StepHead>
       <Stack>
         <OptionGrid label="Deployment target">
@@ -446,7 +446,7 @@ export function InfrastructureStep() {
     <>
       <StepHead title="Infrastructure">
         Everything is created as code in your account, so you can inspect, version and tear it down
-        without Runway.
+        without AiOps.
       </StepHead>
       <Stack>
         <Segmented
@@ -472,7 +472,7 @@ export function InfrastructureStep() {
                     ? "In your local cluster (recommended)"
                     : `A bucket in your ${c.name} account (recommended)`,
               },
-              { value: "runway-managed", label: "Runway-managed backend", disabled: true },
+              { value: "runway-managed", label: "AiOps-managed backend", disabled: true },
             ]}
           />
         )}
@@ -548,7 +548,7 @@ export function PipelineStep() {
           onValueChange={(runsIn) => set({ runsIn })}
           options={[
             { value: "native", label: "GitHub Actions (commits a pipeline file)" },
-            { value: "runway", label: "Runway runners" },
+            { value: "runway", label: "AiOps runners" },
           ]}
         />
         <Segmented
@@ -702,7 +702,7 @@ export function ReviewStep() {
   const resources = plannedResources(state);
   const warnings = planWarnings(state);
   const iacName = state.infra.iac === "opentofu" ? "OpenTofu" : "Terraform";
-  const ciName = state.pipe.runsIn === "runway" ? "Runway runners" : "GitHub Actions";
+  const ciName = state.pipe.runsIn === "runway" ? "AiOps runners" : "GitHub Actions";
   return (
     <>
       <StepHead title="Review the plan">
@@ -786,7 +786,7 @@ export function ReviewStep() {
         </div>
         <Toggle
           label="I've reviewed this plan"
-          description={`Required before Runway can make changes to your ${c.name} account.`}
+          description={`Required before AiOps can make changes to your ${c.name} account.`}
           checked={state.reviewed}
           onCheckedChange={(reviewed) => dispatch({ type: "setReviewed", reviewed })}
         />

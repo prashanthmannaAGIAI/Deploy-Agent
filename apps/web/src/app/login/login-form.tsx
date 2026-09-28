@@ -87,7 +87,7 @@ export function LoginForm({
         {pending ? "Redirecting…" : "Continue"}
       </Button>
       <p className="text-[13px] text-muted">
-        You&apos;ll enter your password on the Runway sign-in page. Two-factor authentication is
+        You&apos;ll enter your password on the AiOps sign-in page. Two-factor authentication is
         required for accounts that can deploy to production.
       </p>
     </form>

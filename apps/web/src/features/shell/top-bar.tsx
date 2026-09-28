@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { DropdownMenu } from "radix-ui";
 import { startTransition } from "react";
 
-import { Logo } from "@/components/ui/icons";
+import { AiOpsLogo } from "@/components/brand/aiops-logo";
 import { cn } from "@/lib/utils";
 
 import { AgentDrawer } from "./agent-drawer";
@@ -26,9 +26,9 @@ export function TopBar({
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-5 flex h-14 items-center gap-4 border-b border-line bg-surface px-5 max-[820px]:gap-2 max-[820px]:px-3">
-      <Link href="/new" className="flex items-center gap-2.5 text-[17px] font-semibold">
-        <Logo />
-        <span className="max-[520px]:hidden">Runway</span>
+      <Link href="/new" aria-label="AiOps home" className="flex flex-none items-center">
+        <AiOpsLogo tagline={false} height={26} className="theme-light-only" />
+        <AiOpsLogo tagline={false} height={26} onDark className="theme-dark-only" />
       </Link>
       <nav aria-label="Main" className="ml-3 flex gap-1 overflow-x-auto max-[820px]:ml-0">
         {NAV.map((n) => (

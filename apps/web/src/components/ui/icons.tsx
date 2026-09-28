@@ -40,17 +40,3 @@ export const LockIcon = (p: IconProps) => (
     <path d="M7 9V6a3 3 0 016 0v3" />
   </svg>
 );
-
-export function Logo({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 26 26" aria-hidden="true">
-      <rect width="26" height="26" rx="7" fill="var(--accent)" />
-      <path
-        d="M7 18h12M9 14.5h8M11 11h4"
-        stroke="var(--accent-ink)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}

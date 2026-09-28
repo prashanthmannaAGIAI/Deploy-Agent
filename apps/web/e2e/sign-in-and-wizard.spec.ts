@@ -5,21 +5,34 @@ const password = process.env.DEV_USER_PASSWORD ?? "";
 
 test.skip(!email || !password, "DEV_USER_EMAIL / DEV_USER_PASSWORD not set in .env");
 
+const POWERED_BY = "Powered By Zosa Agentic";
+
 async function signIn(page: Page) {
   await page.goto("/new");
   await expect(page).toHaveURL(/\/login/);
   await page.getByLabel("Work email").fill(email);
   await page.getByRole("button", { name: "Continue" }).click();
-  // Keycloak's hosted page (Runway theme): the email arrives pre-filled via login_hint.
+  // Keycloak's hosted page (AiOps theme): the email arrives pre-filled via login_hint.
   await expect(page.locator("#username")).toHaveValue(email);
+  await expect(page).toHaveTitle("Sign in to AiOps");
+  // The theme adds the line with CSS (::after), so read the rendered content.
+  const keycloakFooter = await page
+    .locator(".pf-v5-c-login__container")
+    .evaluate((el) => getComputedStyle(el, "::after").content);
+  expect(keycloakFooter).toBe(`"${POWERED_BY}"`);
   await page.locator("#password").fill(password);
   await page.locator("#kc-login").click();
   await expect(page).toHaveURL(/\/new$/);
+  await expect(page.getByRole("link", { name: "AiOps home" })).toBeVisible();
+  await expect(page.getByText(POWERED_BY)).toBeVisible();
 }
 
 test("anonymous visitors are sent to sign-in; social options are coming soon", async ({ page }) => {
   await page.goto("/deployments");
   await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveTitle("Sign in · AiOps");
+  await expect(page.getByRole("img", { name: "AiOps — Your DevOps Agent" })).toBeVisible();
+  await expect(page.getByText(POWERED_BY)).toBeVisible();
   for (const name of ["GitHub", "Google", "Single sign-on (SAML / OIDC)"]) {
     await expect(page.getByRole("button", { name: `${name}, coming soon` })).toBeDisabled();
   }

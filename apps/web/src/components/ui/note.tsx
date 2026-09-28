@@ -38,7 +38,7 @@ export function Note({
       <Icon className="mt-px size-5 flex-none" />
       <div>
         {kind === "agent" && (
-          <div className="mb-0.5 text-[13px] font-semibold text-accent">Runway agent</div>
+          <div className="mb-0.5 text-[13px] font-semibold text-accent">AiOps agent</div>
         )}
         {children}
       </div>

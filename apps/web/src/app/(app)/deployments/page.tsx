@@ -1,6 +1,6 @@
 import { EmptyState } from "@/components/empty-state";
 
-export const metadata = { title: "Deployments · Runway" };
+export const metadata = { title: "Deployments · AiOps" };
 
 // Real deployments are listed from the API once the deploy workflow lands (Phases 2 and 5).
 export default function DeploymentsPage() {

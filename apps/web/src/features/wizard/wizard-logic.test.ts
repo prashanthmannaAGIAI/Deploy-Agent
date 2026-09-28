@@ -24,7 +24,7 @@ const complete = run([
   {
     type: "patch",
     section: "access",
-    values: { accountId: "123456789012", roleArn: "arn:aws:iam::123456789012:role/RunwayDeployer" },
+    values: { accountId: "123456789012", roleArn: "arn:aws:iam::123456789012:role/AiOpsDeployer" },
   },
   { type: "patch", section: "repo", values: { name: "acme/Payments_API", branch: "release/1.4" } },
   { type: "patch", section: "target", values: { type: "container", env: "production" } },

@@ -7,7 +7,7 @@ const ACCESS_FORMATS: Partial<Record<AccessField, [RegExp, string]>> = {
   accountId: [/^\d{12}$/, "Enter the 12-digit AWS account ID."],
   roleArn: [
     /^arn:aws(-[a-z]+)*:iam::\d{12}:role\/[\w+=,.@/-]{1,512}$/,
-    "Enter a role ARN like arn:aws:iam::123456789012:role/RunwayDeployer.",
+    "Enter a role ARN like arn:aws:iam::123456789012:role/AiOpsDeployer.",
   ],
   keyId: [/^(AKIA|ASIA)[A-Z0-9]{16}$/, "Enter an access key ID that starts with AKIA."],
   project: [/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/, "Enter a valid Google Cloud project ID."],

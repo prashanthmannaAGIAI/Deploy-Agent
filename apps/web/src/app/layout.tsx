@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
@@ -14,15 +14,17 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
   variable: "--font-plex-mono",
 });
+// Only the AiOps logo uses Inter (its lettering is set in Inter 750).
+const logoFont = Inter({ subsets: ["latin"], variable: "--font-logo" });
 
 export const metadata: Metadata = {
-  title: "Runway",
-  description: "Ship any repo to any cloud, and see exactly what happened.",
+  title: "AiOps",
+  description: "AiOps, your DevOps agent. Powered By Zosa Agentic.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${plexSans.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${plexSans.variable} ${plexMono.variable} ${logoFont.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -144,6 +144,26 @@
   }
 }
 
+/* Show one of two variants (e.g. the logo) depending on the active theme, following the same
+   rules as the tokens above. */
+.theme-dark-only {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-light-only {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .theme-dark-only {
+    display: inline;
+  }
+}
+:root[data-theme="dark"] .theme-light-only {
+  display: none;
+}
+:root[data-theme="dark"] .theme-dark-only {
+  display: inline;
+}
+
 @keyframes fresh {
   from {
     background: var(--fresh);

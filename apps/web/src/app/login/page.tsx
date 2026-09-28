@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { Logo } from "@/components/ui/icons";
+import { AiOpsLogo, PoweredBy } from "@/components/brand/aiops-logo";
 import { safeCallback } from "@/lib/safe-callback";
 
 import { LoginForm } from "./login-form";
 
-export const metadata = { title: "Sign in · Runway" };
+export const metadata = { title: "Sign in · AiOps" };
 
 // Auth.js error codes → what the user can do about them.
 const ERRORS: Record<string, string> = {
@@ -27,10 +27,7 @@ export default async function LoginPage({
   return (
     <div className="grid min-h-screen grid-cols-[1.1fr_1fr] max-[820px]:grid-cols-1">
       <div className="flex flex-col justify-between gap-8 bg-term p-12 text-term-ink max-[820px]:px-6 max-[820px]:py-8">
-        <div className="flex items-center gap-2.5 text-[17px] font-semibold text-white">
-          <Logo />
-          <span>Runway</span>
-        </div>
+        <AiOpsLogo onDark height={96} />
         <div>
           <h1 className="max-w-[15ch] text-[34px] tracking-[-0.02em] text-white">
             Ship any repo to any cloud, and see exactly what happened.
@@ -58,11 +55,12 @@ export default async function LoginPage({
           <span className="text-[#8FA7FF]">pipeline:</span> github-actions, tests, approval
         </pre>
       </div>
-      <div className="flex items-center justify-center px-6 py-10">
+      <div className="flex flex-col items-center justify-center gap-10 px-6 py-10">
         <LoginForm
           callbackUrl={destination}
           initialError={error ? (ERRORS[error] ?? "Sign-in didn't complete. Try again.") : ""}
         />
+        <PoweredBy />
       </div>
     </div>
   );

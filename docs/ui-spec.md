@@ -38,7 +38,13 @@ Components:
 - **Note**: icon + text; variants neutral / `ok` / `warn` / `err`; **agent note** = accent-soft bg, spark icon, label "Runway agent" in accent 13px bold.
 - **Code block**: `--term` background, mono 12.5px.
 - **Pill**: dot + label; `run` (accent, pulsing dot), `ok`, `bad`.
-- Icons (20×20 stroke): check, warn (triangle), info, spark, lock. Logo: 26px accent rounded square with three horizontal bars.
+- Icons (20×20 stroke): check, warn (triangle), info, spark, lock.
+
+## Brand (replaces the prototype's "Runway" logo)
+
+- Product name **AiOps**, tagline "Your DevOps Agent". Logo: `apps/web/public/brand/aiops-logo.svg` (spacing-corrected from `aiops-logo-original.svg`), inlined as `<AiOpsLogo>` with a white-lettered variant for dark surfaces and a no-tagline crop for the top bar. Favicon: the O emblem (`apps/web/src/app/icon.svg`). Logo lettering uses Inter 750.
+- Every page shows **"Powered By Zosa Agentic"**: under the sign-in form, in the app footer, and under the Keycloak card.
+- The agent is called "AiOps agent"; runners "AiOps runners"; page titles "… · AiOps".
 - Respect `prefers-reduced-motion` for all animations.
 
 ## Layout

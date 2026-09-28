@@ -18,6 +18,7 @@ Branch `phase-1-web-shell`. The pull request is opened after the user has checke
 ### Done
 
 - Steps 1–8.
+- Branding: AiOps logo, name and "Powered By Zosa Agentic" on every page (web app and Keycloak), checked by the e2e test.
 - Checks: `pnpm check` green (62 Vitest, 26 pytest, ESLint, ruff, tsc, mypy strict). `pnpm e2e` (Playwright, real Keycloak) green: sign-in as the dev user, all 8 wizard steps with validation messages, reload persistence, sign-out ending the Keycloak session. Smoke test also checks the dev-user job and the login theme.
 - Contract test: a completed wizard produces a spec that validates against the JSON Schema generated from the Python models.
 - CI: `spec:check` on every push; the PR job now also runs the Playwright tests after the compose smoke test.
@@ -52,4 +53,5 @@ Branch `phase-1-web-shell`. The pull request is opened after the user has checke
 
 ## Decisions from the user
 
+- 2026-09-28: the product is branded **AiOps** ("Your DevOps Agent") with the supplied logo, spacing-corrected with the user's approval (original kept as `aiops-logo-original.svg`). "Powered By Zosa Agentic" appears on every page, including the Keycloak sign-in page. "Runway" stays only in code identifiers.
 - 2026-09-28, Phase 1: sign-in is email + password through Keycloak only; GitHub, Google and SSO shown disabled as "Coming soon". The dev user is created automatically from `DEV_USER_EMAIL` / `DEV_USER_PASSWORD`, local development only, never in any realm export.
