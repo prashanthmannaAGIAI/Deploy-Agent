@@ -2,6 +2,7 @@
   "realm": "runway",
   "enabled": true,
   "displayName": "Runway",
+  "loginTheme": "runway",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
