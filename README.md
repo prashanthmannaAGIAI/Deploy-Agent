@@ -44,6 +44,8 @@ pnpm compose:down             # stop services (add -v to docker compose down to 
 | Temporal UI | http://localhost:8233 |
 | Keycloak admin | http://localhost:8081/admin (user/password from `.env`) |
 
+Port already in use (for example a local PostgreSQL on 5432)? Change the matching `*_PORT` in `.env` (`POSTGRES_PORT=5433`, and the port in `DATABASE_URL`) and run `pnpm compose:up` again.
+
 ## Checks
 
 ```bash

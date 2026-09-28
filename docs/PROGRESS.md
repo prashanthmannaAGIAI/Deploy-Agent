@@ -1,34 +1,19 @@
 # Progress
 
-## Current phase: 0 — Foundations (built; local compose check pending)
+## Current phase: 1 — Web shell and auth (not started)
 
-### Plan
+## Phase 0 — Foundations (complete, 2026-09-28)
 
-1. Monorepo scaffold: pnpm workspace (`apps/web`) and uv workspace (`apps/api`, `services/worker`, `packages/{agent,spec,cloud,scm}`), with placeholder `runner/`, `infra/modules/`, `infra/customer-setup/`.
-2. Minimal runnable apps: FastAPI `GET /healthz` and a Next.js placeholder page. The real UI is Phase 1.
-3. `deploy/docker-compose.yml`: Postgres 16 + pgvector (app DB + Temporal DBs), Redis, Temporal + Temporal UI, Keycloak (dev mode, realm imported from file, client secret from env).
-4. Tooling: ESLint + Prettier + `tsc` for TS; ruff (lint + format) + mypy for Python; Vitest and pytest smoke tests. Root scripts: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm check`.
-5. CI (`.github/workflows/ci.yml`): pnpm + uv caches, cancel superseded runs, lint/typecheck/unit tests on every push. A compose smoke job runs only on PRs to `main` or on manual trigger.
-6. `.env.example` (every variable, with a comment), `.gitignore`, `README.md`.
-7. Docs: `docs/architecture.md`, `docs/ui-spec.md` (condensed prototype), ADRs in `docs/adr/`.
-8. Verify: lint, typecheck and tests pass; `docker compose up` brings every service up healthy; commit and push to `main`.
-
-### Done
-
-- Steps 1–7.
-- `pnpm check` passes locally (Prettier, ESLint, ruff, tsc, mypy strict, Vitest, pytest).
-- `docker compose config` validates; compose refuses to start without `.env` passwords.
-- CI green on GitHub: checks job, and the `compose-smoke` job (all services healthy, smoke probes pass).
-- Decisions: ADR 0002 (TS 6.0 / ESLint 9 / pinned Vitest, pnpm 12 supply-chain settings), ADR 0003 (local stack, Temporal auto-setup 1.29.7).
-
-### Not yet verified (blocks marking Phase 0 complete)
-
-- Local `pnpm compose:up` + `bash deploy/smoke-test.sh`. On 2026-09-28 WSL 2.7 was installed, but WSL 2 couldn't start ("virtualization is not enabled") and Windows had a reboot pending. Docker Desktop had also started before WSL was installed. Passed on GitHub runners.
-- Next session, first: confirm `wsl --status` is clean and `docker info` answers (restart Docker Desktop if needed), `cp .env.example .env` with real values, run compose:up and the smoke test, fix failures, and only then mark Phase 0 complete.
+- pnpm + uv monorepo; FastAPI `/healthz`; Next.js placeholder; placeholder `runner/`, `infra/`.
+- `deploy/docker-compose.yml`: Postgres 16 + pgvector, Redis, Temporal + UI, Keycloak (realm `runway`, client `runway-web`, roles viewer/deployer/admin). `deploy/smoke-test.sh` probes every service.
+- Tooling: Prettier, ESLint, ruff, tsc, mypy strict, Vitest, pytest; `pnpm check` runs all. CI: checks on every push, compose smoke on PRs to `main` / manual.
+- Docs: `architecture.md`, `ui-spec.md`, ADRs 0001–0003.
+- Verified: `pnpm check` green; CI green; local `pnpm compose:up` → all 5 services healthy, smoke test passes, Keycloak client secret substituted from `.env`.
+- Dev machine note: a local PostgreSQL already listens on 5432, so this machine's `.env` uses `POSTGRES_PORT=5433` (and `DATABASE_URL` on 5433).
 
 ### Next
 
-- Phase 1: web shell and auth (branch `phase-1-web-shell`), after Phase 0 is complete.
+- Phase 1 on branch `phase-1-web-shell`: plan here first, then build.
 
 ### Phase 1 decisions (from the user, 2026-09-28)
 
@@ -37,4 +22,4 @@
 
 ### Open questions
 
-- If WSL 2 still can't start after the reboot: enable "Virtual Machine Platform" (`wsl.exe --install --no-distribution` as admin) and check virtualization (Intel VT-x) in the firmware settings.
+- None.
