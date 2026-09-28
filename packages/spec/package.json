@@ -1,0 +1,21 @@
+{
+  "name": "@runway/spec",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deploy spec types generated from the Pydantic models in src/runway_spec. Do not edit ts/generated.ts.",
+  "exports": {
+    ".": "./ts/index.ts",
+    "./schema.json": "./schema/runway.v1.schema.json"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-ts.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "node -e \"process.exit(0)\"",
+    "test": "node -e \"process.exit(0)\""
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "^16.0.0",
+    "typescript": "~6.0.3"
+  }
+}

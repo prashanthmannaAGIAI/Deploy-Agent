@@ -36,6 +36,7 @@ dev = [
   "httpx2",
   "ruff>=0.6",
   "mypy>=1.11",
+  "types-pyyaml",
 ]
 
 [tool.ruff]
@@ -59,5 +60,5 @@ files = ["apps/api/src", "services/worker/src", "packages/agent/src", "packages/
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-testpaths = ["apps/api/tests"]
+testpaths = ["apps/api/tests", "packages/spec/tests"]
 addopts = "--import-mode=importlib"
