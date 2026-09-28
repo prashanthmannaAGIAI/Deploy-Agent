@@ -40,22 +40,28 @@
   --pf-v5-global--BackgroundColor--100: var(--rw-surface);
 }
 
+/* Same backdrop as the AiOps sign-in page: deep navy lit by the logo gradient. */
 body,
 .pf-v5-c-login {
-  background: var(--rw-bg) !important;
+  background:
+    radial-gradient(700px 420px at 12% 8%, rgba(17, 183, 233, 0.2), transparent 65%),
+    radial-gradient(640px 520px at 95% 100%, rgba(52, 54, 168, 0.45), transparent 60%),
+    linear-gradient(160deg, #081226 0%, #0d1c3b 55%, #131a48 100%) fixed !important;
   font-family: var(--pf-v5-global--FontFamily--text);
 }
 
 .pf-v5-c-login__main {
   background: var(--rw-surface);
-  border-radius: 12px;
+  border-radius: 18px;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
 }
 
 .pf-v5-c-button.pf-m-primary {
-  --pf-v5-c-button--m-primary--BackgroundColor: var(--rw-accent);
-  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--rw-accent);
-  --pf-v5-c-button--m-primary--Color: var(--rw-accent-ink);
-  --pf-v5-c-button--m-primary--hover--Color: var(--rw-accent-ink);
+  --pf-v5-c-button--m-primary--Color: #ffffff;
+  --pf-v5-c-button--m-primary--hover--Color: #ffffff;
+  background: linear-gradient(135deg, #11b7e9 0%, #2878e8 45%, #3436a8 100%) !important;
+  border: 0;
+  box-shadow: 0 8px 20px -8px rgba(40, 120, 232, 0.7);
   border-radius: 8px;
   min-height: 40px;
   font-weight: 500;
@@ -68,11 +74,8 @@ body,
 /* Header: the AiOps logo instead of the realm name. */
 #kc-header-wrapper {
   font-size: 0 !important;
-  height: 88px;
-  background: url("../img/aiops-logo.svg") center / contain no-repeat;
-}
-:root.pf-v5-theme-dark #kc-header-wrapper {
-  background-image: url("../img/aiops-logo-on-dark.svg");
+  height: 96px;
+  background: url("../img/aiops-logo-on-dark.svg") center / contain no-repeat;
 }
 
 /* Footer line shown on every AiOps page. */
@@ -81,6 +84,6 @@ body,
   grid-column: 1 / -1;
   justify-self: center;
   margin-top: 24px;
-  color: var(--rw-muted);
+  color: #a9b8d3;
   font-size: 12.5px;
 }

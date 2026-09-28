@@ -12,7 +12,11 @@ const EMAIL = /^\S+@\S+\.\S+$/;
 
 function SsoButton({ children }: { children: string }) {
   return (
-    <Button disabled className="relative" aria-label={`${children}, coming soon`}>
+    <Button
+      disabled
+      className="relative min-w-0 flex-wrap whitespace-normal py-1.5"
+      aria-label={`${children}, coming soon`}
+    >
       {children}
       <ComingSoon />
     </Button>
@@ -33,7 +37,7 @@ export function LoginForm({
   return (
     <form
       noValidate
-      className="grid w-full max-w-[380px] gap-4"
+      className="grid w-full min-w-0 max-w-[380px] gap-4"
       onSubmit={(e) => {
         e.preventDefault();
         const email = emailRef.current?.value.trim() ?? "";
@@ -53,7 +57,7 @@ export function LoginForm({
         <h2>Sign in</h2>
         <p className="mt-1.5 text-muted">Use your work account to continue.</p>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
         <SsoButton>GitHub</SsoButton>
         <SsoButton>Google</SsoButton>
       </div>
@@ -83,7 +87,12 @@ export function LoginForm({
       >
         {error}
       </p>
-      <Button variant="primary" type="submit" disabled={pending}>
+      <Button
+        variant="primary"
+        type="submit"
+        disabled={pending}
+        className="border-transparent bg-[linear-gradient(135deg,#11B7E9_0%,#2878E8_45%,#3436A8_100%)] text-white shadow-[0_8px_20px_-8px_rgba(40,120,232,0.7)]"
+      >
         {pending ? "Redirecting…" : "Continue"}
       </Button>
       <p className="text-[13px] text-muted">

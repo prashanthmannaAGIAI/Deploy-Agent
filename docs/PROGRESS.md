@@ -19,6 +19,7 @@ Branch `phase-1-web-shell`. The pull request is opened after the user has checke
 
 - Steps 1–8.
 - Branding: AiOps logo, name and "Powered By Zosa Agentic" on every page (web app and Keycloak), checked by the e2e test.
+- Sign-in page redesign (user request): animated AI robot running a CI/CD pipeline, navy + logo-gradient palette, carried over to the Keycloak page. The rest of the app keeps the prototype tokens.
 - Checks: `pnpm check` green (62 Vitest, 26 pytest, ESLint, ruff, tsc, mypy strict). `pnpm e2e` (Playwright, real Keycloak) green: sign-in as the dev user, all 8 wizard steps with validation messages, reload persistence, sign-out ending the Keycloak session. Smoke test also checks the dev-user job and the login theme.
 - Contract test: a completed wizard produces a spec that validates against the JSON Schema generated from the Python models.
 - CI: `spec:check` on every push; the PR job now also runs the Playwright tests after the compose smoke test.
