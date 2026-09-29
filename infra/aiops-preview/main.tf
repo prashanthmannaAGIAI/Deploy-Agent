@@ -28,10 +28,10 @@ provider "google" {
 data "google_project" "this" {}
 
 locals {
-  # Cloud Run's deterministic URLs, known before the services exist, so Keycloak and the web
-  # app can point at each other without a dependency cycle.
-  web_url      = "https://aiops-web-${data.google_project.this.number}.${var.region}.run.app"
-  keycloak_url = "https://aiops-keycloak-${data.google_project.this.number}.${var.region}.run.app"
+  # Public addresses (custom domains, see domains.tf). Known before the services exist, so
+  # Keycloak and the web app can point at each other without a dependency cycle.
+  web_url      = "https://${var.web_domain}"
+  keycloak_url = "https://${var.auth_domain}"
   sql_instance = "${var.project_id}:${var.region}:${google_sql_database_instance.keycloak.name}"
 }
 
@@ -136,7 +136,8 @@ resource "google_secret_manager_secret_iam_member" "access" {
 # --- Keycloak database ("Cheapest": smallest shared-core instance) ------------------------
 
 resource "google_sql_database_instance" "keycloak" {
-  name                = "aiops-keycloak-db"
+  # Deleted Cloud SQL names are blocked for about a week; "-sg" since the move to Singapore.
+  name                = "aiops-keycloak-db-sg"
   database_version    = "POSTGRES_16"
   region              = var.region
   deletion_protection = false # preview: `terraform destroy` removes everything

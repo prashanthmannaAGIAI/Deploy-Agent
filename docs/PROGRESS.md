@@ -52,6 +52,11 @@ Branch `phase-1-web-shell`. The pull request is opened after the user has checke
 - Docs: `architecture.md`, `ui-spec.md`, ADRs 0001–0003.
 - Dev machine note: a local PostgreSQL already listens on 5432, so this machine's `.env` uses `POSTGRES_PORT=5433` (and `DATABASE_URL` on 5433).
 
+## Custom domain (2026-09-29, branch `custom-domain`)
+
+- Cloud Run domain mapping is not allowed in `asia-south1`, so the preview moved to `asia-southeast1` (Singapore) at the user's choice (no extra cost vs a load balancer). Addresses: https://aiops.zosa-agentic.ai and https://auth.aiops.zosa-agentic.ai. `zosa-agentic.ai` verified in Search Console by freddie.manna@thinkhat.ai; DNS at GoDaddy.
+- The move recreated the Keycloak database (`aiops-keycloak-db-sg`): the admin account is re-invited and MFA re-applied.
+
 ## Hosted preview (live since 2026-09-29, branch `deploy-gcp-preview`)
 
 - Web: https://aiops-web-152128589088.asia-south1.run.app · Keycloak: https://aiops-keycloak-152128589088.asia-south1.run.app (project `enliv-342806`, `asia-south1`). Runbook: `infra/aiops-preview/README.md`.
