@@ -1,0 +1,13 @@
+# Never send local secrets or build output into an image.
+.env
+.env.*
+!.env.example
+**/node_modules
+**/.next
+**/.venv
+**/__pycache__
+**/test-results
+**/playwright-report
+.git
+infra/**/.terraform
+*.tfstate*

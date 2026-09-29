@@ -13,6 +13,9 @@ loadEnvConfig(
 );
 
 const nextConfig: NextConfig = {
+  // Self-contained server for the container image (deploy/gcp/web.Dockerfile).
+  output: "standalone",
+  outputFileTracingRoot: path.resolve(import.meta.dirname, "../.."),
   reactStrictMode: true,
   transpilePackages: ["@runway/spec"],
   poweredByHeader: false,
