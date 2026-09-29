@@ -17,7 +17,10 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "pnpm dev",
+    // Start Next directly: through `pnpm dev`, Playwright's shutdown signal never reached the
+    // Next process on Linux CI and the run hung after the tests passed.
+    command: "next dev --port 3000",
+    gracefulShutdown: { signal: "SIGTERM", timeout: 5_000 },
     url: `${process.env.WEB_BASE_URL ?? "http://localhost:3000"}/login`,
     reuseExistingServer: true,
     timeout: 120_000,

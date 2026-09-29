@@ -76,6 +76,7 @@ jobs:
       - name: Install Playwright browser
         run: pnpm --filter @runway/web exec playwright install --with-deps chromium
       - name: End-to-end tests (sign-in and wizard)
+        timeout-minutes: 10
         run: pnpm e2e
       - name: Playwright traces on failure
         if: failure()
