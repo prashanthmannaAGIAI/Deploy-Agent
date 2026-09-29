@@ -274,11 +274,18 @@ resource "google_cloud_run_v2_service" "keycloak" {
           }
         }
       }
+      # Readiness, not just an open port: Keycloak opens 8080 while still bootstrapping (and
+      # answers 503). With CPU allocated only during requests, a probe that passes early lets
+      # Cloud Run throttle the CPU and the first-boot schema setup stalls. Cloud Run keeps full
+      # CPU until this passes and only then routes traffic, so users wait instead of seeing 503.
       startup_probe {
-        tcp_socket { port = 8080 }
+        http_get {
+          path = "/health/ready"
+          port = 9000
+        }
         period_seconds    = 5
         timeout_seconds   = 3
-        failure_threshold = 48 # up to 4 minutes for a cold start with realm import
+        failure_threshold = 60 # up to 5 minutes (first boot creates the schema)
       }
     }
 
