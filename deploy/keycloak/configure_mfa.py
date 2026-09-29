@@ -86,7 +86,7 @@ def ensure_role(kc: Keycloak) -> None:
 
 
 def subflow_of(execs: list[dict[str, Any]], target: dict[str, Any]) -> dict[str, Any]:
-    """The subflow an execution sits in: the last flow one level up before it (list is depth-first)."""
+    """The subflow an execution sits in: the last flow one level up before it (depth-first list)."""
     parent = None
     for e in execs:
         if e["id"] == target["id"]:
