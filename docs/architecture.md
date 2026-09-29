@@ -37,6 +37,12 @@ Browser ──HTTPS/WS──▶ apps/web (Next.js) ──REST/WS──▶ apps/a
 
 `runway.yaml` is the single source of truth. The wizard edits it, the agent proposes patches to it, the workflow reads it. Specs are versioned per project; a deployment pins one spec version.
 
+The Pydantic models in `packages/spec` generate `schema/runway.v1.schema.json`, and from that the TypeScript types (`@runway/spec`). The web app reads field formats (repo, branch, domain, env names…) from the same schema, and a contract test checks that a completed wizard produces a schema-valid spec.
+
+## Sign-in
+
+Auth.js v5 in the web app, Keycloak (realm `runway`, client `runway-web`) as the OIDC provider: authorization code + PKCE. Runway's page collects the email and hands off to Keycloak's hosted page (`login_hint`), so passwords and MFA stay in Keycloak. Every app route is protected by `apps/web/src/proxy.ts` and again in the `(app)` layout. Sign-out also ends the Keycloak session. See ADR 0004.
+
 ## Deployment workflow
 
 Temporal workflow, activities idempotent and retry-safe:

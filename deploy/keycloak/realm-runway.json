@@ -1,7 +1,8 @@
 {
   "realm": "runway",
   "enabled": true,
-  "displayName": "Runway",
+  "displayName": "AiOps",
+  "loginTheme": "runway",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
@@ -24,7 +25,7 @@
   "clients": [
     {
       "clientId": "runway-web",
-      "name": "Runway web app",
+      "name": "AiOps web app",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,

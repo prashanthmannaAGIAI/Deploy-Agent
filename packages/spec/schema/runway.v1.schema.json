@@ -1,0 +1,592 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://runway.dev/schema/runway.v1.json",
+  "$defs": {
+    "Approval": {
+      "enum": [
+        "production",
+        "none"
+      ],
+      "title": "Approval",
+      "type": "string"
+    },
+    "AuthMethod": {
+      "enum": [
+        "kubeconfig",
+        "cross-account-role",
+        "access-keys",
+        "workload-identity",
+        "service-account-key",
+        "federated-credential",
+        "client-secret",
+        "api-token",
+        "api-signing-key"
+      ],
+      "title": "AuthMethod",
+      "type": "string"
+    },
+    "Build": {
+      "additionalProperties": false,
+      "properties": {
+        "stack": {
+          "$ref": "#/$defs/Stack"
+        },
+        "version": {
+          "pattern": "^[0-9][0-9A-Za-z.-]{0,19}$",
+          "title": "Version",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/$defs/ImageSource"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "description": "Single-line shell command run inside the build sandbox.",
+              "pattern": "^[^\\r\\n\\x00]{1,500}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Build command.",
+          "title": "Command"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "description": "Single-line shell command run inside the build sandbox.",
+              "pattern": "^[^\\r\\n\\x00]{1,500}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Start command (not for static).",
+          "title": "Start"
+        },
+        "port": {
+          "anyOf": [
+            {
+              "maximum": 65535,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Port the app listens on.",
+          "title": "Port"
+        },
+        "output_dir": {
+          "anyOf": [
+            {
+              "description": "Path relative to the repository root; no '..' segments.",
+              "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[A-Za-z0-9._/-]{1,200}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Static build output.",
+          "title": "Output Dir"
+        }
+      },
+      "required": [
+        "stack",
+        "version",
+        "image"
+      ],
+      "title": "Build",
+      "type": "object"
+    },
+    "Cloud": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/CloudProviderName"
+        },
+        "region": {
+          "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+          "title": "Region",
+          "type": "string"
+        },
+        "auth": {
+          "$ref": "#/$defs/AuthMethod"
+        }
+      },
+      "required": [
+        "provider",
+        "region",
+        "auth"
+      ],
+      "title": "Cloud",
+      "type": "object"
+    },
+    "CloudProviderName": {
+      "enum": [
+        "local",
+        "aws",
+        "gcp",
+        "azure",
+        "digitalocean",
+        "oci"
+      ],
+      "title": "CloudProviderName",
+      "type": "string"
+    },
+    "Database": {
+      "enum": [
+        "none",
+        "postgres",
+        "mysql",
+        "redis",
+        "mongodb"
+      ],
+      "title": "Database",
+      "type": "string"
+    },
+    "EnvVar": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "pattern": "^[^\\x00]{0,4096}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "secret": {
+          "default": false,
+          "title": "Secret",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EnvVar",
+      "type": "object"
+    },
+    "Environment": {
+      "enum": [
+        "dev",
+        "staging",
+        "production"
+      ],
+      "title": "Environment",
+      "type": "string"
+    },
+    "IacTool": {
+      "enum": [
+        "terraform",
+        "opentofu",
+        "none"
+      ],
+      "title": "IacTool",
+      "type": "string"
+    },
+    "ImageSource": {
+      "enum": [
+        "generate",
+        "dockerfile",
+        "buildpacks"
+      ],
+      "title": "ImageSource",
+      "type": "string"
+    },
+    "Infrastructure": {
+      "additionalProperties": false,
+      "properties": {
+        "iac": {
+          "$ref": "#/$defs/IacTool"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateBackend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required unless iac is none."
+        },
+        "kubernetes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Kubernetes"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "size": {
+          "$ref": "#/$defs/Size"
+        },
+        "scaling": {
+          "$ref": "#/$defs/Scaling"
+        },
+        "database": {
+          "$ref": "#/$defs/Database",
+          "default": "none"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "pattern": "^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Domain"
+        },
+        "tls": {
+          "default": true,
+          "title": "Tls",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "iac",
+        "size",
+        "scaling"
+      ],
+      "title": "Infrastructure",
+      "type": "object"
+    },
+    "Kubernetes": {
+      "additionalProperties": false,
+      "properties": {
+        "cluster": {
+          "anyOf": [
+            {
+              "const": "create",
+              "type": "string"
+            },
+            {
+              "description": "Lowercase DNS label: letters, digits and hyphens, at most 63 characters.",
+              "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+              "type": "string"
+            }
+          ],
+          "description": "'create' for a new cluster, or the name of an existing one.",
+          "title": "Cluster"
+        },
+        "namespace": {
+          "default": "default",
+          "description": "Lowercase DNS label: letters, digits and hyphens, at most 63 characters.",
+          "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+          "title": "Namespace",
+          "type": "string"
+        },
+        "helm": {
+          "default": true,
+          "title": "Helm",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cluster"
+      ],
+      "title": "Kubernetes",
+      "type": "object"
+    },
+    "Notify": {
+      "enum": [
+        "slack",
+        "teams",
+        "email",
+        "none"
+      ],
+      "title": "Notify",
+      "type": "string"
+    },
+    "Pipeline": {
+      "additionalProperties": false,
+      "properties": {
+        "runs_in": {
+          "$ref": "#/$defs/RunsIn"
+        },
+        "trigger": {
+          "$ref": "#/$defs/Trigger"
+        },
+        "tests": {
+          "$ref": "#/$defs/Tests"
+        },
+        "security_scan": {
+          "default": true,
+          "title": "Security Scan",
+          "type": "boolean"
+        },
+        "approval": {
+          "$ref": "#/$defs/Approval",
+          "default": "production"
+        },
+        "rollback": {
+          "$ref": "#/$defs/Rollback",
+          "default": "automatic"
+        },
+        "notify": {
+          "$ref": "#/$defs/Notify",
+          "default": "none"
+        }
+      },
+      "required": [
+        "runs_in",
+        "trigger",
+        "tests"
+      ],
+      "title": "Pipeline",
+      "type": "object"
+    },
+    "Rollback": {
+      "enum": [
+        "automatic",
+        "manual"
+      ],
+      "title": "Rollback",
+      "type": "string"
+    },
+    "RunsIn": {
+      "enum": [
+        "github-actions",
+        "bitbucket-pipelines",
+        "gitlab-ci",
+        "runway"
+      ],
+      "title": "RunsIn",
+      "type": "string"
+    },
+    "Scaling": {
+      "additionalProperties": false,
+      "properties": {
+        "min": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Min",
+          "type": "integer"
+        },
+        "max": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "Scaling",
+      "type": "object"
+    },
+    "Size": {
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "title": "Size",
+      "type": "string"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/SourceProviderName"
+        },
+        "repo": {
+          "description": "Repository as owner/name.",
+          "pattern": "^[A-Za-z0-9_.-]{1,100}/[A-Za-z0-9_.-]{1,100}$",
+          "title": "Repo",
+          "type": "string"
+        },
+        "branch": {
+          "pattern": "^(?![-/])(?!.*\\.\\.)(?!.*//)(?!.*@\\{)[A-Za-z0-9._/@-]{1,200}(?<![/.])(?<!\\.lock)$",
+          "title": "Branch",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "repo",
+        "branch"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "SourceProviderName": {
+      "enum": [
+        "github",
+        "bitbucket",
+        "gitlab"
+      ],
+      "title": "SourceProviderName",
+      "type": "string"
+    },
+    "Stack": {
+      "enum": [
+        "nodejs",
+        "python",
+        "java",
+        "go",
+        "dotnet",
+        "php",
+        "frontend"
+      ],
+      "title": "Stack",
+      "type": "string"
+    },
+    "StateBackend": {
+      "enum": [
+        "customer-bucket",
+        "runway-managed"
+      ],
+      "title": "StateBackend",
+      "type": "string"
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/TargetType"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Target",
+      "type": "object"
+    },
+    "TargetType": {
+      "enum": [
+        "container",
+        "kubernetes",
+        "serverless",
+        "vm",
+        "static"
+      ],
+      "title": "TargetType",
+      "type": "string"
+    },
+    "Tests": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "description": "Single-line shell command run inside the build sandbox.",
+              "pattern": "^[^\\r\\n\\x00]{1,500}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Command"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "Tests",
+      "type": "object"
+    },
+    "Trigger": {
+      "enum": [
+        "push",
+        "tag",
+        "manual"
+      ],
+      "title": "Trigger",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A complete, deployable spec.",
+  "properties": {
+    "apiVersion": {
+      "const": "runway/v1",
+      "default": "runway/v1",
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "project": {
+      "description": "Lowercase DNS label: letters, digits and hyphens, at most 63 characters.",
+      "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+      "title": "Project",
+      "type": "string"
+    },
+    "environment": {
+      "$ref": "#/$defs/Environment"
+    },
+    "cloud": {
+      "$ref": "#/$defs/Cloud"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "target": {
+      "$ref": "#/$defs/Target"
+    },
+    "build": {
+      "$ref": "#/$defs/Build"
+    },
+    "infrastructure": {
+      "$ref": "#/$defs/Infrastructure"
+    },
+    "pipeline": {
+      "$ref": "#/$defs/Pipeline"
+    },
+    "env": {
+      "items": {
+        "$ref": "#/$defs/EnvVar"
+      },
+      "title": "Env",
+      "type": "array"
+    }
+  },
+  "required": [
+    "project",
+    "environment",
+    "cloud",
+    "source",
+    "target",
+    "build",
+    "infrastructure",
+    "pipeline"
+  ],
+  "title": "RunwaySpec",
+  "type": "object"
+}

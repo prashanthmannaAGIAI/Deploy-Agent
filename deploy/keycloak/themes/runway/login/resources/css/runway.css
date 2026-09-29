@@ -1,0 +1,89 @@
+/* AiOps login theme: tokens from docs/ui-spec.md mapped onto PatternFly 5 variables. */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --rw-bg: #edf1f5;
+  --rw-surface: #ffffff;
+  --rw-ink: #15202b;
+  --rw-muted: #586475;
+  --rw-line-2: #c3ccd7;
+  --rw-accent: #2b57e0;
+  --rw-accent-ink: #ffffff;
+  --rw-err: #bf3434;
+
+  --pf-v5-global--FontFamily--text:
+    "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pf-v5-global--FontFamily--heading: var(--pf-v5-global--FontFamily--text);
+  --pf-v5-global--FontFamily--monospace: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --pf-v5-global--primary-color--100: var(--rw-accent);
+  --pf-v5-global--primary-color--200: var(--rw-accent);
+  --pf-v5-global--link--Color: var(--rw-accent);
+  --pf-v5-global--link--Color--hover: var(--rw-accent);
+  --pf-v5-global--Color--100: var(--rw-ink);
+  --pf-v5-global--Color--200: var(--rw-muted);
+  --pf-v5-global--BorderColor--100: var(--rw-line-2);
+  --pf-v5-global--danger-color--100: var(--rw-err);
+  --pf-v5-global--BorderRadius--sm: 8px;
+  --pf-v5-global--active-color--100: var(--rw-accent);
+  --keycloak-card-top-color: var(--rw-accent);
+}
+
+:root.pf-v5-theme-dark {
+  --rw-bg: #0f141a;
+  --rw-surface: #171e26;
+  --rw-ink: #e4e9ef;
+  --rw-muted: #98a3b2;
+  --rw-line-2: #374352;
+  --rw-accent: #7c9bff;
+  --rw-accent-ink: #0c1430;
+  --rw-err: #f07474;
+  --pf-v5-global--BackgroundColor--100: var(--rw-surface);
+}
+
+/* Same backdrop as the AiOps sign-in page: deep navy lit by the logo gradient. */
+body,
+.pf-v5-c-login {
+  background:
+    radial-gradient(700px 420px at 12% 8%, rgba(17, 183, 233, 0.2), transparent 65%),
+    radial-gradient(640px 520px at 95% 100%, rgba(52, 54, 168, 0.45), transparent 60%),
+    linear-gradient(160deg, #081226 0%, #0d1c3b 55%, #131a48 100%) fixed !important;
+  font-family: var(--pf-v5-global--FontFamily--text);
+}
+
+.pf-v5-c-login__main {
+  background: var(--rw-surface);
+  border-radius: 18px;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+}
+
+.pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--Color: #ffffff;
+  --pf-v5-c-button--m-primary--hover--Color: #ffffff;
+  background: linear-gradient(135deg, #11b7e9 0%, #2878e8 45%, #3436a8 100%) !important;
+  border: 0;
+  box-shadow: 0 8px 20px -8px rgba(40, 120, 232, 0.7);
+  border-radius: 8px;
+  min-height: 40px;
+  font-weight: 500;
+}
+
+.pf-v5-c-form-control {
+  border-radius: 8px;
+}
+
+/* Header: the AiOps logo instead of the realm name. */
+#kc-header-wrapper {
+  font-size: 0 !important;
+  height: 96px;
+  background: url("../img/aiops-logo-on-dark.svg") center / contain no-repeat;
+}
+
+/* Footer line shown on every AiOps page. */
+.pf-v5-c-login__container::after {
+  content: "Powered By Zosa Agentic";
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 24px;
+  color: #a9b8d3;
+  font-size: 12.5px;
+}

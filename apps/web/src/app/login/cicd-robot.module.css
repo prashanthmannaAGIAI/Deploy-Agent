@@ -1,0 +1,389 @@
+/* Sign-in illustration. One 9s loop; the packet reaches each stage at 5/20/38/56/74% and the
+   stage check, progress line and log line for that stage appear at the same moment. */
+
+.scene {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-mono);
+}
+
+.terminal {
+  fill: rgba(9, 16, 34, 0.72);
+  stroke: rgba(124, 155, 255, 0.28);
+}
+.termTitle {
+  fill: #7f8ca6;
+  font-size: 10.5px;
+}
+.logLine {
+  font-size: 11.5px;
+  opacity: 0;
+}
+.cmd {
+  fill: #8fa7ff;
+}
+.ok {
+  fill: #6fd3a0;
+}
+.cursor {
+  fill: #d3dce6;
+}
+
+.shadow {
+  fill: rgba(0, 0, 0, 0.35);
+}
+.track {
+  stroke: rgba(201, 216, 242, 0.16);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.progress {
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 416;
+  stroke-dashoffset: 416;
+}
+.node {
+  fill: #0e1d3d;
+  stroke: rgba(124, 155, 255, 0.45);
+  stroke-width: 2;
+}
+.done {
+  opacity: 0;
+}
+.stageLabel {
+  fill: #9fb0cc;
+  font-size: 11px;
+}
+.packet {
+  transform: translateX(64px);
+  opacity: 0;
+}
+.live {
+  opacity: 0;
+}
+.liveText {
+  fill: #6fd3a0;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* transform origins for the robot's moving parts */
+.arm,
+.eyes,
+.ring,
+.sparkle,
+.bob,
+.shadow,
+.antennaGlow {
+  transform-box: fill-box;
+}
+.arm {
+  transform-origin: 50% 6%;
+}
+.consoleA,
+.consoleB,
+.consoleC {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.eyes,
+.ring,
+.sparkle,
+.antennaGlow,
+.shadow {
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bob {
+    animation: bob 3.2s ease-in-out infinite;
+  }
+  .shadow {
+    animation: shadow 3.2s ease-in-out infinite;
+  }
+  .eyes {
+    animation: blink 4.5s infinite;
+  }
+  .antennaGlow {
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  .ring {
+    animation: spin 6s linear infinite;
+  }
+  .sparkle {
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  .arm {
+    animation: tap 0.9s ease-in-out infinite;
+  }
+  .consoleA {
+    animation: typing 1.8s steps(6) infinite;
+  }
+  .consoleB {
+    animation: typing 2.4s steps(8) infinite 0.3s;
+  }
+  .consoleC {
+    animation: typing 1.5s steps(5) infinite 0.6s;
+  }
+  .cursor {
+    animation: cursor 1s steps(1) infinite;
+  }
+
+  .packet {
+    animation: packet 9s ease-in-out infinite;
+  }
+  .progress {
+    animation: progress 9s ease-in-out infinite;
+  }
+  .live {
+    animation: live 9s ease-out infinite;
+  }
+  .stage0,
+  .log0 {
+    animation: at5 9s infinite;
+  }
+  .stage1,
+  .log1 {
+    animation: at20 9s infinite;
+  }
+  .stage2,
+  .log2 {
+    animation: at38 9s infinite;
+  }
+  .stage3,
+  .log3 {
+    animation: at56 9s infinite;
+  }
+  .stage4,
+  .log4 {
+    animation: at74 9s infinite;
+  }
+}
+
+/* Reduced motion: show the finished run. */
+@media (prefers-reduced-motion: reduce) {
+  .done,
+  .logLine,
+  .live {
+    opacity: 1;
+  }
+  .progress {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+@keyframes shadow {
+  50% {
+    transform: scaleX(0.82);
+    opacity: 0.7;
+  }
+}
+@keyframes blink {
+  0%,
+  46%,
+  50%,
+  100% {
+    transform: scaleY(1);
+  }
+  48% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes pulse {
+  50% {
+    transform: scale(1.5);
+    opacity: 0.35;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes twinkle {
+  50% {
+    transform: scale(0.7) rotate(45deg);
+    opacity: 0.7;
+  }
+}
+@keyframes tap {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+@keyframes typing {
+  from {
+    transform: scaleX(0.2);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes packet {
+  0% {
+    transform: translateX(64px);
+    opacity: 0;
+  }
+  3%,
+  6% {
+    transform: translateX(64px);
+    opacity: 1;
+  }
+  20%,
+  24% {
+    transform: translateX(168px);
+  }
+  38%,
+  42% {
+    transform: translateX(272px);
+  }
+  56%,
+  60% {
+    transform: translateX(376px);
+  }
+  74%,
+  88% {
+    transform: translateX(480px);
+    opacity: 1;
+  }
+  94%,
+  100% {
+    transform: translateX(480px);
+    opacity: 0;
+  }
+}
+@keyframes progress {
+  0%,
+  6% {
+    stroke-dashoffset: 416;
+  }
+  20%,
+  24% {
+    stroke-dashoffset: 312;
+  }
+  38%,
+  42% {
+    stroke-dashoffset: 208;
+  }
+  56%,
+  60% {
+    stroke-dashoffset: 104;
+  }
+  74%,
+  92% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  97% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 416;
+    opacity: 0;
+  }
+}
+@keyframes live {
+  0%,
+  76% {
+    opacity: 0;
+    transform: translate(480px, -26px);
+  }
+  80%,
+  92% {
+    opacity: 1;
+    transform: translate(480px, -34px);
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: translate(480px, -34px);
+  }
+}
+@keyframes at5 {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  6%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes at20 {
+  0%,
+  19% {
+    opacity: 0;
+  }
+  21%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes at38 {
+  0%,
+  37% {
+    opacity: 0;
+  }
+  39%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes at56 {
+  0%,
+  55% {
+    opacity: 0;
+  }
+  57%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes at74 {
+  0%,
+  73% {
+    opacity: 0;
+  }
+  75%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}

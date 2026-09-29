@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+/* Design tokens from docs/ui-spec.md. Light by default, dark by system preference unless
+   html[data-theme=light]; html[data-theme=dark] forces dark. */
+:root {
+  --bg: #edf1f5;
+  --surface: #ffffff;
+  --surface-2: #f5f7fa;
+  --ink: #15202b;
+  --muted: #586475;
+  --line: #d5dce4;
+  --line-2: #c3ccd7;
+  --accent: #2b57e0;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3eafc;
+  --ok: #16825a;
+  --ok-soft: #e0f2e9;
+  --warn: #9a620c;
+  --warn-soft: #fbefd8;
+  --err: #bf3434;
+  --err-soft: #fbe5e5;
+  --term: #101820;
+  --term-ink: #d3dce6;
+  --term-muted: #7f8c9c;
+  --fresh: #fff3c4;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a;
+    --surface: #171e26;
+    --surface-2: #1c252f;
+    --ink: #e4e9ef;
+    --muted: #98a3b2;
+    --line: #29333f;
+    --line-2: #374352;
+    --accent: #7c9bff;
+    --accent-ink: #0c1430;
+    --accent-soft: #1d2947;
+    --ok: #4bc28a;
+    --ok-soft: #12302a;
+    --warn: #e2a94a;
+    --warn-soft: #342712;
+    --err: #f07474;
+    --err-soft: #3a1919;
+    --term: #0a0f14;
+    --term-ink: #d3dce6;
+    --term-muted: #76839a;
+    --fresh: #3a3417;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f141a;
+  --surface: #171e26;
+  --surface-2: #1c252f;
+  --ink: #e4e9ef;
+  --muted: #98a3b2;
+  --line: #29333f;
+  --line-2: #374352;
+  --accent: #7c9bff;
+  --accent-ink: #0c1430;
+  --accent-soft: #1d2947;
+  --ok: #4bc28a;
+  --ok-soft: #12302a;
+  --warn: #e2a94a;
+  --warn-soft: #342712;
+  --err: #f07474;
+  --err-soft: #3a1919;
+  --term: #0a0f14;
+  --term-ink: #d3dce6;
+  --term-muted: #76839a;
+  --fresh: #3a3417;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-err: var(--err);
+  --color-err-soft: var(--err-soft);
+  --color-term: var(--term);
+  --color-term-ink: var(--term-ink);
+  --color-term-muted: var(--term-muted);
+  --color-fresh: var(--fresh);
+  --font-sans:
+    var(--font-plex-sans), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    height: 100%;
+  }
+  body {
+    min-height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    line-height: 1.25;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 26px;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 21px;
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    font-size: 16px;
+  }
+  code {
+    font: 12.5px var(--font-mono);
+    background: var(--surface);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+}
+
+/* Show one of two variants (e.g. the logo) depending on the active theme, following the same
+   rules as the tokens above. */
+.theme-dark-only {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-light-only {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .theme-dark-only {
+    display: inline;
+  }
+}
+:root[data-theme="dark"] .theme-light-only {
+  display: none;
+}
+:root[data-theme="dark"] .theme-dark-only {
+  display: inline;
+}
+
+@keyframes fresh {
+  from {
+    background: var(--fresh);
+  }
+  to {
+    background: transparent;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spec-fresh {
+    animation: fresh 1.6s ease-out;
+  }
+  .pill-run-dot {
+    animation: pulse-dot 1s ease-in-out infinite;
+  }
+}

@@ -38,7 +38,14 @@ Components:
 - **Note**: icon + text; variants neutral / `ok` / `warn` / `err`; **agent note** = accent-soft bg, spark icon, label "Runway agent" in accent 13px bold.
 - **Code block**: `--term` background, mono 12.5px.
 - **Pill**: dot + label; `run` (accent, pulsing dot), `ok`, `bad`.
-- Icons (20×20 stroke): check, warn (triangle), info, spark, lock. Logo: 26px accent rounded square with three horizontal bars.
+- Icons (20×20 stroke): check, warn (triangle), info, spark, lock.
+
+## Brand (replaces the prototype's "Runway" logo)
+
+- Product name **AiOps**, tagline "Your DevOps Agent". Logo: `apps/web/public/brand/aiops-logo.svg` (spacing-corrected from `aiops-logo-original.svg`), inlined as `<AiOpsLogo>` with a white-lettered variant for dark surfaces and a no-tagline crop for the top bar. Favicon: the O emblem (`apps/web/src/app/icon.svg`). Logo lettering uses Inter 750.
+- Every page shows **"Powered By Zosa Agentic"**: under the sign-in form, in the app footer, and under the Keycloak card.
+- The agent is called "AiOps agent"; runners "AiOps runners"; page titles "… · AiOps".
+- **Sign-in page (redesigned, replaces the prototype's login art):** left panel in deep navy (#081226 → #0D1C3B → #131A48) lit by soft glows in the logo gradient (#11B7E9 → #2878E8 → #3436A8), a slowly drifting dot grid, and the headline's "see exactly what happened." in gradient text. Below it, an animated scene (`apps/web/src/app/login/cicd-robot.tsx`): the AiOps robot (the O-ring on its chest) taps a console while a build moves through Commit → Build → Test → Scan → Deploy, a terminal logs each stage and a "Live" badge appears; 9s loop, hidden below 820px, static finished state under reduced motion. The form sits in an elevated card; the primary button uses the logo gradient. The Keycloak password page uses the same backdrop and button.
 - Respect `prefers-reduced-motion` for all animations.
 
 ## Layout

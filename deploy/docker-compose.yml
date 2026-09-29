@@ -86,7 +86,8 @@ services:
       - "127.0.0.1:${KEYCLOAK_PORT:-8081}:8080"
     volumes:
       - keycloak-data:/opt/keycloak/data
-      - ./keycloak:/opt/keycloak/data/import:ro
+      - ./keycloak/realm-runway.json:/opt/keycloak/data/import/realm-runway.json:ro
+      - ./keycloak/themes/runway:/opt/keycloak/themes/runway:ro
     healthcheck:
       # The image has no curl/wget; talk HTTP to the management port with bash.
       test:
@@ -98,6 +99,24 @@ services:
       timeout: 5s
       retries: 30
       start_period: 30s
+
+  # DEV ONLY: creates the local dev user from DEV_USER_EMAIL / DEV_USER_PASSWORD, then exits.
+  # Not part of the realm file or any export. See deploy/keycloak/dev/create-dev-user.sh.
+  keycloak-dev-user:
+    image: quay.io/keycloak/keycloak:26.7.4
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    entrypoint: ["bash", "/scripts/create-dev-user.sh"]
+    restart: "no"
+    environment:
+      RUNWAY_ENV: ${RUNWAY_ENV:-dev}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:?set in .env}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set in .env}
+      DEV_USER_EMAIL: ${DEV_USER_EMAIL:-}
+      DEV_USER_PASSWORD: ${DEV_USER_PASSWORD:-}
+    volumes:
+      - ./keycloak/dev:/scripts:ro
 
 volumes:
   postgres-data:
