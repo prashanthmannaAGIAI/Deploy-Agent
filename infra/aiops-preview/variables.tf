@@ -5,9 +5,9 @@ variable "project_id" {
 }
 
 variable "region" {
-  description = "Region for every AiOps resource."
+  description = "Region for every AiOps resource. asia-southeast1 (Singapore) because Cloud Run domain mapping is not allowed in asia-south1."
   type        = string
-  default     = "asia-south1"
+  default     = "asia-southeast1"
 }
 
 variable "web_image" {
@@ -24,4 +24,16 @@ variable "cloud_sql_proxy_version" {
   description = "Cloud SQL Auth Proxy image tag (sidecar next to Keycloak)."
   type        = string
   default     = "2.26.0"
+}
+
+variable "web_domain" {
+  description = "Custom domain for the web app (a subdomain of a domain verified in Search Console)."
+  type        = string
+  default     = "aiops.zosa-agentic.ai"
+}
+
+variable "auth_domain" {
+  description = "Custom domain for Keycloak (sign-in)."
+  type        = string
+  default     = "auth.aiops.zosa-agentic.ai"
 }

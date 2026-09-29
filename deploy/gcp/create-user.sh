@@ -14,7 +14,7 @@ ROLES=("$@")
 for r in "${ROLES[@]}"; do [[ "$r" =~ ^(viewer|deployer|admin)$ ]] || { echo "Unknown role: $r"; exit 1; }; done
 
 PROJECT=${PROJECT:-enliv-342806}
-REGION=${REGION:-asia-south1}
+REGION=${REGION:-asia-southeast1}
 GCLOUD=${GCLOUD:-gcloud}
 
 KC_URL=$("$GCLOUD" run services describe aiops-keycloak --region "$REGION" --project "$PROJECT" --format='value(status.url)')
