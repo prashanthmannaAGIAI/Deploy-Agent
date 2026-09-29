@@ -34,8 +34,11 @@ async function endKeycloakSession(refreshToken: string) {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Keycloak({ clientId, clientSecret, issuer, checks: ["pkce", "state"] })],
   secret: required("AUTH_SECRET"),
-  // Trusting the Host header is only safe on a developer machine; elsewhere set AUTH_URL.
-  trustHost: process.env.RUNWAY_ENV === "dev",
+  // Hosted deployments set AUTH_URL, and Auth.js then builds every URL from it rather than
+  // from the request's Host header. Only a developer machine may trust the Host header.
+  // (An explicit `false` here would override Auth.js's own AUTH_URL default and reject
+  // every request in production.)
+  trustHost: process.env.RUNWAY_ENV === "dev" || Boolean(process.env.AUTH_URL),
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
   pages: { signIn: "/login", error: "/login" },
   callbacks: {

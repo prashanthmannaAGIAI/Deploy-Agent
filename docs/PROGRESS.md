@@ -52,7 +52,18 @@ Branch `phase-1-web-shell`. The pull request is opened after the user has checke
 - Docs: `architecture.md`, `ui-spec.md`, ADRs 0001–0003.
 - Dev machine note: a local PostgreSQL already listens on 5432, so this machine's `.env` uses `POSTGRES_PORT=5433` (and `DATABASE_URL` on 5433).
 
+## Hosted preview (live since 2026-09-29, branch `deploy-gcp-preview`)
+
+- Web: https://aiops-web-152128589088.asia-south1.run.app · Keycloak: https://aiops-keycloak-152128589088.asia-south1.run.app (project `enliv-342806`, `asia-south1`). Runbook: `infra/aiops-preview/README.md`.
+- Terraform in `infra/aiops-preview` (state `gs://aiops-tfstate-enliv-342806`): Cloud Run web + Keycloak (scale to zero, Cloud SQL Auth Proxy sidecar), Cloud SQL `db-f1-micro`, Secret Manager, service accounts, registry; all `aiops-*`.
+- MFA (TOTP) required for admins and deployers (`deploy/keycloak/configure_mfa.py`); invite-only accounts via `deploy/gcp/create-user.sh`. First account: `admin@zosa-agentic.ai` (admin, deployer), temporary password in secret `aiops-initial-password-admin-zosa-agentic-ai`.
+- Verified live: route protection, Keycloak sign-in, wizard, sign-out, MFA setup prompt for the admin.
+- Fixed during rollout: Keycloak startup probe now checks readiness (a TCP probe let Cloud Run throttle CPU during first boot and the schema setup stalled); Auth.js `trustHost` now honours `AUTH_URL`.
+- Next: GitHub and Google sign-in (waiting for the user's OAuth apps; link-to-invited-accounts only), SSO (waiting for the provider), then own domain.
+
 ## Decisions from the user
+
+- 2026-09-29: MFA required for admins and deployers only; GitHub/Google sign-in may only link to invited accounts (no automatic account creation).
 
 - 2026-09-29, hosting the platform (preview, after the Phase 1 PR is merged): Google Cloud project `enliv-342806`, region `asia-south1`, "Cheapest" option (web, API and Keycloak on Cloud Run scaling to zero; Keycloak on the smallest Cloud SQL Postgres; about $10/month, slow first sign-in after idle), default `*.run.app` URLs first and the user's own domain later, invite-only sign-in now with open sign-up later. First account: `admin@zosa-agentic.ai` (admin). The local dev user is never created there. Infrastructure as Terraform in `infra/`; plan and cost shown before any apply, applied only on the user's explicit go-ahead.
 - 2026-09-28: the product is branded **AiOps** ("Your DevOps Agent") with the supplied logo, spacing-corrected with the user's approval (original kept as `aiops-logo-original.svg`). "Powered By Zosa Agentic" appears on every page, including the Keycloak sign-in page. "Runway" stays only in code identifiers.
